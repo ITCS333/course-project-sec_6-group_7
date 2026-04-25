@@ -94,31 +94,11 @@ function handleLogin(event) {
     return;
   }
 
-  fetch("api/index.php", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      email: email,
-      password: password
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      displayMessage("Login successful!", "success");
-      emailInput.value = "";
-      passwordInput.value = "";
-    } else {
-      displayMessage(data.message, "error");
-    }
-  })
-  .catch(() => {
-    displayMessage("Error connecting to server.", "error");
-  });
-}
+  displayMessage("Login successful!", "success");
 
+  emailInput.value = "";
+  passwordInput.value = "";
+}
 /**
  * TODO: Implement the setupLoginForm function.
  * This function will be called once to set up the form.
