@@ -32,6 +32,11 @@ $method = $_SERVER['REQUEST_METHOD'];
 $raw = file_get_contents('php://input');
 $data = json_decode($raw, true);
 
+// ✅ FIX: handle invalid JSON safely
+if ($method !== 'GET' && !is_array($data)) {
+    sendResponse('Missing required fields', 400);
+}
+
 // TODO: Read query string parameters.
 $id = $_GET['id'] ?? null;
 $action = $_GET['action'] ?? null;
@@ -70,7 +75,6 @@ function getUserById($db, $id) {
     ");
 
     $stmt->execute([':id' => $id]);
-
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$user) {
@@ -112,7 +116,6 @@ function createUser($db, $data) {
     }
 
     $hashed = password_hash($password, PASSWORD_DEFAULT);
-
     $is_admin = isset($data['is_admin']) && $data['is_admin'] == 1 ? 1 : 0;
 
     $stmt = $db->prepare("
@@ -120,18 +123,16 @@ function createUser($db, $data) {
         VALUES (:name, :email, :password, :is_admin)
     ");
 
-    $success = $stmt->execute([
+    if ($stmt->execute([
         ':name' => $name,
         ':email' => $email,
         ':password' => $hashed,
         ':is_admin' => $is_admin
-    ]);
-
-    if ($success) {
+    ])) {
         sendResponse(['id' => $db->lastInsertId()], 201);
-    } else {
-        sendResponse('Failed to create user', 500);
     }
+
+    sendResponse('Failed to create user', 500);
 }
 
 function updateUser($db, $data) {
@@ -180,17 +181,17 @@ function updateUser($db, $data) {
     }
 
     if (empty($fields)) {
-        sendResponse('No data to update', 200);
+        sendResponse(['message' => 'No data to update'], 200);
     }
 
     $sql = "UPDATE users SET " . implode(', ', $fields) . " WHERE id = :id";
     $stmt = $db->prepare($sql);
 
     if ($stmt->execute($params)) {
-        sendResponse('User updated successfully', 200);
-    } else {
-        sendResponse('Failed to update user', 500);
+        sendResponse(['message' => 'User updated successfully'], 200);
     }
+
+    sendResponse('Failed to update user', 500);
 }
 
 function deleteUser($db, $id) {
@@ -208,10 +209,10 @@ function deleteUser($db, $id) {
     $stmt = $db->prepare("DELETE FROM users WHERE id = :id");
 
     if ($stmt->execute([':id' => $id])) {
-        sendResponse('User deleted successfully', 200);
-    } else {
-        sendResponse('Failed to delete user', 500);
+        sendResponse(['message' => 'User deleted successfully'], 200);
     }
+
+    sendResponse('Failed to delete user', 500);
 }
 
 function changePassword($db, $data) {
@@ -249,10 +250,10 @@ function changePassword($db, $data) {
     $update = $db->prepare("UPDATE users SET password = :password WHERE id = :id");
 
     if ($update->execute([':password' => $hashed, ':id' => $id])) {
-        sendResponse('Password updated successfully', 200);
-    } else {
-        sendResponse('Failed to update password', 500);
+        sendResponse(['message' => 'Password updated successfully'], 200);
     }
+
+    sendResponse('Failed to update password', 500);
 }
 
 // ROUTER
@@ -314,5 +315,4 @@ function sanitizeInput($data) {
     $data = strip_tags($data);
     return htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
 }
-
 ?>

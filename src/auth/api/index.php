@@ -23,8 +23,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $rawData = file_get_contents('php://input');
 
 // TODO: Decode the JSON data into a PHP associative array
-$data = json_decode($rawData, true);
-
+ $data = json_decode($rawData, true);
+if (!$data || !is_array($data)) {
+    echo json_encode(['success' => false, 'message' => 'Missing fields']);
+    exit;
+}
 // TODO: Extract the email and password
 if (!isset($data['email']) || !isset($data['password'])) {
     echo json_encode(['success' => false, 'message' => 'Missing fields']);
@@ -81,16 +84,14 @@ try {
 
         // TODO: Prepare success response
         $response = [
-            'success' => true,
-            'message' => 'Login successful',
-            'user' => [
-                'id' => $user['id'],
-                'name' => $user['name'],
-                'email' => $user['email'],
-                'is_admin' => $user['is_admin']
-            ]
-        ];
-
+    'success' => true,
+    'user' => [
+        'id' => $user['id'],
+        'name' => $user['name'],
+        'email' => $user['email'],
+        'is_admin' => $user['is_admin']
+    ]
+];
         echo json_encode($response);
         exit;
 
