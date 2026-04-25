@@ -14,7 +14,7 @@ header('Content-Type: application/json');
 // --- Check Request Method ---
 // TODO: Verify that the request method is POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['success' => false, 'message' => 'Invalid request']);
+    echo json_encode(['success' => false]);
     exit;
 }
 
@@ -23,14 +23,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $rawData = file_get_contents('php://input');
 
 // TODO: Decode the JSON data into a PHP associative array
- $data = json_decode($rawData, true);
+$data = json_decode($rawData, true);
+
+// ✅ handle invalid / empty JSON
 if (!$data || !is_array($data)) {
-    echo json_encode(['success' => false, 'message' => 'Missing fields']);
+    echo json_encode(['success' => false]);
     exit;
 }
+
 // TODO: Extract the email and password
 if (!isset($data['email']) || !isset($data['password'])) {
-    echo json_encode(['success' => false, 'message' => 'Missing fields']);
+    echo json_encode(['success' => false]);
     exit;
 }
 
@@ -41,13 +44,13 @@ $password = $data['password'];
 // --- Server-Side Validation ---
 // TODO: Validate email format
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    echo json_encode(['success' => false, 'message' => 'Invalid email']);
+    echo json_encode(['success' => false]);
     exit;
 }
 
 // TODO: Validate password length
 if (strlen($password) < 8) {
-    echo json_encode(['success' => false, 'message' => 'Invalid password']);
+    echo json_encode(['success' => false]);
     exit;
 }
 
@@ -82,25 +85,28 @@ try {
         $_SESSION['is_admin'] = $user['is_admin'];
         $_SESSION['logged_in'] = true;
 
-        // TODO: Prepare success response
+        // TODO: Prepare a success response array
         $response = [
-    'success' => true,
-    'user' => [
-        'id' => $user['id'],
-        'name' => $user['name'],
-        'email' => $user['email'],
-        'is_admin' => $user['is_admin']
-    ]
-];
+            'success' => true,
+            'user' => [
+                'id' => $user['id'],
+                'name' => $user['name'],
+                'email' => $user['email'],
+                'is_admin' => $user['is_admin']
+            ]
+        ];
+
+        // TODO: Encode the response array as JSON and echo it
         echo json_encode($response);
+
+        // TODO: Exit the script
         exit;
 
     } else {
 
         // --- Handle Failed Authentication ---
         $response = [
-            'success' => false,
-            'message' => 'Invalid email or password'
+            'success' => false
         ];
 
         echo json_encode($response);
@@ -114,8 +120,7 @@ try {
 
     // TODO: Return generic error
     echo json_encode([
-        'success' => false,
-        'message' => 'Server error'
+        'success' => false
     ]);
 
     exit;
