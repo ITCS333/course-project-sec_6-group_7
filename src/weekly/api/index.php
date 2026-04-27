@@ -64,34 +64,22 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
 
-require_once __DIR__ . '/../../../common/db.php';
+
+require_once __DIR__ . '/../../common/db.php';
+
 $db = getDBConnection();
 
-$method    = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$action    = $_GET['action'] ?? null;
-$id        = $_GET['id'] ?? null;
-$weekId    = $_GET['week_id'] ?? null;
+
+$method    = $_SERVER['REQUEST_METHOD'];
+$rawData   = file_get_contents('php://input');
+$data      = json_decode($rawData, true);
+
+$action    = $_GET['action']     ?? null;
+$id        = $_GET['id']         ?? null;
+$weekId    = $_GET['week_id']    ?? null;
 $commentId = $_GET['comment_id'] ?? null;
-$data      = [];
 
-if (in_array($method, ['POST', 'PUT', 'DELETE'], true)) {
-    $rawInput = file_get_contents('php://input');
-
-    if ($rawInput !== '') {
-        $decoded = json_decode($rawInput, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
-            sendResponse(['success' => false, 'message' => 'Invalid JSON body.'], 400);
-        }
-
-        $data = $decoded;
-    }
-}
 
 
 // ============================================================================
@@ -435,6 +423,8 @@ function deleteComment(PDO $db, $commentId): void
 
 try {
 
+    $db = getDBConnection();
+
     if ($method === 'GET') {
 
         if ($action === 'comments') {
@@ -470,13 +460,12 @@ try {
     }
 
 } catch (PDOException $e) {
-    error_log($e->getMessage());
+    error_log('PDOException: ' . $e->getMessage());
     sendResponse(['success' => false, 'message' => 'Database error.'], 500);
 } catch (Exception $e) {
-    error_log($e->getMessage());
+    error_log('Exception: ' . $e->getMessage());
     sendResponse(['success' => false, 'message' => 'Server error.'], 500);
 }
-
 
 // ============================================================================
 // HELPER FUNCTIONS
