@@ -72,8 +72,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/../../../common/db.php';
 $db = getDBConnection();
 
+$method    = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$action    = $_GET['action'] ?? null;
+$id        = $_GET['id'] ?? null;
+$weekId    = $_GET['week_id'] ?? null;
+$commentId = $_GET['comment_id'] ?? null;
+$data      = [];
 
+if (in_array($method, ['POST', 'PUT', 'DELETE'], true)) {
+    $rawInput = file_get_contents('php://input');
 
+    if ($rawInput !== '') {
+        $decoded = json_decode($rawInput, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+            sendResponse(['success' => false, 'message' => 'Invalid JSON body.'], 400);
+        }
+
+        $data = $decoded;
+    }
+}
 
 
 // ============================================================================

@@ -83,16 +83,16 @@ function getWeekIdFromURL() {
  *    (week.links is already a decoded string array from the API.)
  */
 function renderWeekDetails(week) {
- weekTitle.textContent = week.title;
-  weekStartDate.textContent = "Starts on: " + week.start_date;
+  weekTitle.textContent       = week.title;
+  weekStartDate.textContent   = "Starts on: " + week.start_date;
   weekDescription.textContent = week.description;
 
   weekLinksList.innerHTML = "";
-
-  week.links.forEach(link => {
+  const links = Array.isArray(week.links) ? week.links : [];
+  links.forEach(link => {
     const li = document.createElement("li");
-    const a = document.createElement("a");
-    a.href = link;
+    const a  = document.createElement("a");
+    a.href        = link;
     a.textContent = link;
     li.appendChild(a);
     weekLinksList.appendChild(li);
