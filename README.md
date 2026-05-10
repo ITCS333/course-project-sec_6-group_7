@@ -24,7 +24,7 @@ The website covers five functional areas, each assigned to one team member.
 | 1 | Home Page, Authentication & User Management | | |
 | 2 | Course Resources | | |
 | 3 | Weekly Breakdown |202310605|Mrym-35|
-| 4 | Assignments | | |
+| 4 | Assignments |202303420|jasmine-shebl|
 | 5 | Discussion Board | | |
 
 ---
