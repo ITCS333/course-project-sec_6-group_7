@@ -1,0 +1,515 @@
+/* ==========================================================================
+   Discussion Board — styles.css
+   Aesthetic: Academic / Editorial dark theme
+   Fonts: DM Serif Display (headings) + IBM Plex Mono (meta/code) + Lora (body)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
+
+/* --------------------------------------------------------------------------
+   1. DESIGN TOKENS
+   -------------------------------------------------------------------------- */
+:root {
+  /* Palette */
+  --bg:           #0f1117;
+  --bg-surface:   #171b24;
+  --bg-raised:    #1e2330;
+  --border:       #2a3040;
+  --border-light: #313a4d;
+
+  --text:         #dde3ef;
+  --text-muted:   #6b7894;
+  --text-dim:     #8a96b0;
+
+  --accent:       #e8a838;        /* amber gold */
+  --accent-dim:   rgba(232,168,56,.15);
+  --accent-hover: #f0bc5a;
+
+  --danger:       #d95f5f;
+  --danger-dim:   rgba(217,95,95,.15);
+  --danger-hover: #e87878;
+
+  --safe:         #5fa882;
+  --safe-dim:     rgba(95,168,130,.15);
+
+  /* Typography */
+  --font-display: 'DM Serif Display', Georgia, serif;
+  --font-body:    'Lora', Georgia, serif;
+  --font-mono:    'IBM Plex Mono', 'Courier New', monospace;
+
+  /* Spacing scale */
+  --sp-xs:  0.375rem;
+  --sp-sm:  0.75rem;
+  --sp-md:  1.25rem;
+  --sp-lg:  2rem;
+  --sp-xl:  3rem;
+
+  /* Radii */
+  --r-sm: 3px;
+  --r-md: 6px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.5);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.6);
+}
+
+/* --------------------------------------------------------------------------
+   2. RESET & BASE
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--text);
+  background-color: var(--bg);
+  min-height: 100vh;
+
+  /* Subtle grid texture */
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* --------------------------------------------------------------------------
+   3. PAGE-LOAD ANIMATION
+   -------------------------------------------------------------------------- */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+header        { animation: fadeUp .5s ease both; }
+main > *:nth-child(1) { animation: fadeUp .5s .1s ease both; }
+main > *:nth-child(2) { animation: fadeUp .5s .2s ease both; }
+main > *:nth-child(3) { animation: fadeUp .5s .3s ease both; }
+
+/* --------------------------------------------------------------------------
+   4. HEADER
+   -------------------------------------------------------------------------- */
+header {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  padding: var(--sp-lg) var(--sp-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Amber accent stripe at top */
+header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+/* Decorative background glow */
+header::after {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, rgba(232,168,56,.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+header h1,
+header h1#topic-subject {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  max-width: 860px;
+  margin: 0 auto;
+  position: relative;
+}
+
+header h1 span,
+header h1#topic-subject::first-line {
+  color: var(--accent);
+}
+
+/* "Back to board" link — injected or manually placed */
+header a.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-bottom: var(--sp-sm);
+  transition: color .2s;
+}
+header a.back-link:hover { color: var(--accent); }
+
+/* --------------------------------------------------------------------------
+   5. MAIN LAYOUT
+   -------------------------------------------------------------------------- */
+main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: var(--sp-xl) var(--sp-lg) calc(var(--sp-xl) * 2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-xl);
+}
+
+/* --------------------------------------------------------------------------
+   6. SECTION CARDS
+   -------------------------------------------------------------------------- */
+section,
+article#original-post {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow .25s;
+}
+
+section:hover,
+article#original-post:hover {
+  box-shadow: var(--shadow-md);
+}
+
+/* --------------------------------------------------------------------------
+   7. SECTION HEADINGS (h2)
+   -------------------------------------------------------------------------- */
+section h2,
+section#replies-section h2 {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: var(--sp-md) var(--sp-lg);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-raised);
+}
+
+/* --------------------------------------------------------------------------
+   8. FORMS (shared: new-topic-form & reply-form)
+   -------------------------------------------------------------------------- */
+form {
+  padding: var(--sp-lg);
+}
+
+fieldset {
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-sm);
+  padding: var(--sp-md) var(--sp-lg) var(--sp-lg);
+}
+
+legend {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0 var(--sp-sm);
+}
+
+label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: var(--sp-md);
+  margin-bottom: var(--sp-xs);
+}
+
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: .65rem .9rem;
+  font-family: var(--font-body);
+  font-size: .95rem;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-sm);
+  resize: vertical;
+  transition: border-color .2s, box-shadow .2s;
+  outline: none;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+
+input[type="text"]::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+  opacity: .6;
+}
+
+/* --------------------------------------------------------------------------
+   9. BUTTONS (shared base)
+   -------------------------------------------------------------------------- */
+button {
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  padding: .45rem 1.1rem;
+  cursor: pointer;
+  transition: background .2s, color .2s, border-color .2s, box-shadow .2s, transform .1s;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+/* Submit buttons — amber filled */
+button[type="submit"],
+button#create-topic {
+  margin-top: var(--sp-md);
+  padding: .6rem 1.6rem;
+  background: var(--accent);
+  color: #0f1117;
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(232,168,56,.25);
+}
+
+button[type="submit"]:hover,
+button#create-topic:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  box-shadow: 0 4px 16px rgba(232,168,56,.35);
+}
+
+/* Edit button — outline amber */
+button.edit-btn {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+button.edit-btn:hover {
+  background: var(--accent-dim);
+}
+
+/* Delete buttons — outline red */
+button.delete-btn,
+button.delete-reply-btn {
+  background: transparent;
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+button.delete-btn:hover,
+button.delete-reply-btn:hover {
+  background: var(--danger-dim);
+  border-color: var(--danger-hover);
+  color: var(--danger-hover);
+}
+
+/* --------------------------------------------------------------------------
+   10. TOPIC LIST (#topic-list-container articles)
+   -------------------------------------------------------------------------- */
+#topic-list-container {
+  padding: var(--sp-md) var(--sp-lg) var(--sp-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-md);
+}
+
+#topic-list-container article {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-sm);
+  padding: var(--sp-md) var(--sp-md);
+  transition: border-left-color .2s, box-shadow .2s, transform .15s;
+}
+
+#topic-list-container article:hover {
+  border-left-color: var(--accent-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateX(2px);
+}
+
+#topic-list-container article h3 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 400;
+  margin-bottom: .35rem;
+}
+
+#topic-list-container article h3 a {
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+
+#topic-list-container article h3 a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+#topic-list-container article footer {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  color: var(--text-muted);
+  margin-bottom: var(--sp-sm);
+  letter-spacing: .03em;
+}
+
+#topic-list-container article div {
+  display: flex;
+  gap: var(--sp-sm);
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   11. ORIGINAL POST (topic.html — article#original-post)
+   -------------------------------------------------------------------------- */
+article#original-post {
+  padding: var(--sp-lg);
+  border-left: 3px solid var(--accent);
+}
+
+article#original-post p#op-message {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--text);
+  margin-bottom: var(--sp-md);
+  white-space: pre-wrap;
+}
+
+article#original-post footer#op-footer {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  color: var(--text-muted);
+  letter-spacing: .04em;
+  margin-bottom: var(--sp-md);
+  padding-top: var(--sp-sm);
+  border-top: 1px solid var(--border);
+}
+
+article#original-post div#topic-actions {
+  display: flex;
+  gap: var(--sp-sm);
+  flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   12. REPLIES SECTION (topic.html)
+   -------------------------------------------------------------------------- */
+section#replies-section {
+  display: flex;
+  flex-direction: column;
+}
+
+#reply-list-container {
+  padding: var(--sp-md) var(--sp-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-md);
+}
+
+/* Each injected reply article */
+#reply-list-container article {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-light);
+  border-radius: var(--r-sm);
+  padding: var(--sp-md);
+  transition: border-left-color .2s, box-shadow .2s;
+}
+
+#reply-list-container article:hover {
+  border-left-color: var(--safe);
+  box-shadow: var(--shadow-sm);
+}
+
+#reply-list-container article p {
+  font-size: .98rem;
+  line-height: 1.75;
+  color: var(--text);
+  margin-bottom: var(--sp-sm);
+  white-space: pre-wrap;
+}
+
+#reply-list-container article footer {
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  color: var(--text-muted);
+  letter-spacing: .04em;
+  margin-bottom: var(--sp-sm);
+}
+
+#reply-list-container article div {
+  display: flex;
+  gap: var(--sp-sm);
+}
+
+/* Reply form sits inside replies-section */
+section#replies-section form#reply-form {
+  border-top: 1px solid var(--border);
+  background: var(--bg-raised);
+}
+
+/* --------------------------------------------------------------------------
+   13. EMPTY STATE (when no topics / replies yet)
+   -------------------------------------------------------------------------- */
+#topic-list-container:empty::before,
+#reply-list-container:empty::before {
+  content: 'Nothing here yet.';
+  display: block;
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  color: var(--text-muted);
+  text-align: center;
+  letter-spacing: .06em;
+  padding: var(--sp-lg) 0;
+}
+
+/* --------------------------------------------------------------------------
+   14. SCROLLBAR (WebKit)
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar              { width: 8px; }
+::-webkit-scrollbar-track        { background: var(--bg); }
+::-webkit-scrollbar-thumb        { background: var(--border-light); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover  { background: var(--text-muted); }
+
+/* --------------------------------------------------------------------------
+   15. RESPONSIVE
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  header               { padding: var(--sp-md); }
+  main                 { padding: var(--sp-lg) var(--sp-md); gap: var(--sp-lg); }
+  form                 { padding: var(--sp-md); }
+  fieldset             { padding: var(--sp-sm) var(--sp-md) var(--sp-md); }
+  #topic-list-container,
+  #reply-list-container { padding: var(--sp-sm) var(--sp-md) var(--sp-md); }
+  article#original-post { padding: var(--sp-md); }
+}
