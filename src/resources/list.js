@@ -13,7 +13,7 @@ function createResourceArticle(resource) {
   article.appendChild(description);
 
   const link = document.createElement("a");
-  link.href = `details.html?id=${resource.id}`;  // Fixed the href to match the expected format
+  link.href = `details.html?id=${resource.id}`;  // Corrected href
   link.textContent = "View Resource & Discussion";
   article.appendChild(link);
 
