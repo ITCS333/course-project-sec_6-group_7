@@ -1,59 +1,115 @@
-/**
- * Create an article for each comment
- */
+
+let currentResourceId = null;
+let currentComments = [];
+
+const resourceTitle = document.getElementById("resource-title");
+const resourceDescription = document.getElementById("resource-description");
+const resourceLink = document.getElementById("resource-link");
+const commentList = document.getElementById("comment-list");
+const commentForm = document.getElementById("comment-form");
+const newComment = document.getElementById("new-comment");
+
+function getResourceIdFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("id");
+}
+
+function renderResourceDetails(resource) {
+  resourceTitle.textContent = resource.title;
+  resourceDescription.textContent = resource.description;
+  resourceLink.href = resource.link;
+}
+
 function createCommentArticle(comment) {
   const article = document.createElement("article");
 
-  const commentText = document.createElement("p");
-  commentText.textContent = comment.text;
-  article.appendChild(commentText);
+  const p = document.createElement("p");
+  p.textContent = comment.text;
 
   const footer = document.createElement("footer");
   footer.textContent = `Posted by: ${comment.author}`;
+
+  article.appendChild(p);
   article.appendChild(footer);
 
   return article;
 }
 
-/**
- * Render comments for a resource
- */
-function renderComments(comments) {
-  const commentList = document.getElementById("comment-list");
+function renderComments() {
   commentList.innerHTML = "";
 
-  comments.forEach((comment) => {
-    const commentArticle = createCommentArticle(comment);
-    commentList.appendChild(commentArticle);
+  currentComments.forEach(comment => {
+    const article = createCommentArticle(comment);
+    commentList.appendChild(article);
   });
 }
 
-/**
- * Handle the form submission for adding a new comment
- */
 async function handleAddComment(event) {
   event.preventDefault();
-  const commentText = document.getElementById("new-comment").value.trim();
-  if (commentText === "") return;
 
-  const resourceId = new URLSearchParams(window.location.search).get("id");
-  const response = await fetch("./api/index.php?action=comment", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      resource_id: resourceId,
-      author: "Student",
-      text: commentText,
-    }),
-  });
+  const commentText = newComment.value.trim();
 
-  const data = await response.json();
-  if (data.success) {
-    renderComments([data.comment]);
-    document.getElementById("new-comment").value = "";
-  } else {
-    console.error("Failed to add comment");
+  if (!commentText) {
+    return;
+  }
+
+  try {
+    const response = await fetch("./api/index.php?action=comment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        resource_id: currentResourceId,
+        author: "Student",
+        text: commentText
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      currentComments.push(result.data);
+      renderComments();
+      newComment.value = "";
+    }
+
+  } catch (error) {
+    console.error(error);
   }
 }
+
+async function initializePage() {
+  currentResourceId = getResourceIdFromURL();
+
+  if (!currentResourceId) {
+    resourceTitle.textContent = "Resource not found.";
+    return;
+  }
+
+  try {
+    const [resourceResponse, commentsResponse] = await Promise.all([
+      fetch(`./api/index.php?id=${currentResourceId}`),
+      fetch(`./api/index.php?resource_id=${currentResourceId}&action=comments`)
+    ]);
+
+    const resourceResult = await resourceResponse.json();
+    const commentsResult = await commentsResponse.json();
+
+    currentComments = commentsResult.data || [];
+
+    if (resourceResult.success) {
+      renderResourceDetails(resourceResult.data);
+      renderComments();
+      commentForm.addEventListener("submit", handleAddComment);
+    } else {
+      resourceTitle.textContent = "Resource not found.";
+    }
+
+  } catch (error) {
+    console.error(error);
+    resourceTitle.textContent = "Resource not found.";
+  }
+}
+
+initializePage();

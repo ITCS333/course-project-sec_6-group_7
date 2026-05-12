@@ -1,194 +1,180 @@
-/*
-  Requirement: Handle CRUD operations for managing course resources.
-*/
 
-// --- Global Variables ---
 let resources = [];
-const resourceForm = document.getElementById('resource-form');
-const resourcesTbody = document.getElementById('resources-tbody');
 
-// --- Functions ---
+const resourceForm = document.getElementById("resource-form");
 
-/**
- * Create a table row for a resource.
- * It takes one resource object { id, title, description, link }.
- * It returns a <tr> element.
- */
+const resourcesTbody = document.getElementById("resources-tbody");
+
+let editingId = null;
+
 function createResourceRow(resource) {
-  const row = document.createElement('tr');
+  const tr = document.createElement("tr");
 
-  const titleCell = document.createElement('td');
-  titleCell.textContent = resource.title;
-  row.appendChild(titleCell);
+  const titleTd = document.createElement("td");
+  titleTd.textContent = resource.title;
 
-  const descriptionCell = document.createElement('td');
-  descriptionCell.textContent = resource.description;
-  row.appendChild(descriptionCell);
+  const descriptionTd = document.createElement("td");
+  descriptionTd.textContent = resource.description;
 
-  const linkCell = document.createElement('td');
-  const link = document.createElement('a');
-  link.href = resource.link;
-  link.textContent = resource.link;  // Show the URL as text so tests can find it
-  linkCell.appendChild(link);
-  row.appendChild(linkCell);
+  const linkTd = document.createElement("td");
+  linkTd.textContent = resource.link;
 
-  const actionsCell = document.createElement('td');
-  const editButton = document.createElement('button');
-  editButton.textContent = 'Edit';
-  editButton.classList.add('edit-btn');
-  editButton.setAttribute('data-id', resource.id);
+  const actionsTd = document.createElement("td");
 
-  const deleteButton = document.createElement('button');
-  deleteButton.textContent = 'Delete';
-  deleteButton.classList.add('delete-btn');
-  deleteButton.setAttribute('data-id', resource.id);
+  const editBtn = document.createElement("button");
+  editBtn.textContent = "Edit";
+  editBtn.className = "edit-btn";
+  editBtn.dataset.id = resource.id;
 
-  actionsCell.appendChild(editButton);
-  actionsCell.appendChild(deleteButton);
-  row.appendChild(actionsCell);
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "Delete";
+  deleteBtn.className = "delete-btn";
+  deleteBtn.dataset.id = resource.id;
 
-  return row;
+  actionsTd.appendChild(editBtn);
+  actionsTd.appendChild(deleteBtn);
+
+  tr.appendChild(titleTd);
+  tr.appendChild(descriptionTd);
+  tr.appendChild(linkTd);
+  tr.appendChild(actionsTd);
+
+  return tr;
 }
 
-/**
- * Render the resources into the table.
- */
 function renderTable() {
-  resourcesTbody.innerHTML = '';  // Clear existing content
-  resources.forEach(function(resource) {
+  resourcesTbody.innerHTML = "";
+
+  resources.forEach(resource => {
     const row = createResourceRow(resource);
     resourcesTbody.appendChild(row);
   });
 }
 
-/**
- * Fetch resources from the API and populate the table.
- */
-async function loadResources() {
-  try {
-    const response = await fetch('./api/index.php');
-    const data = await response.json();
-
-    if (data.success) {
-      resources = data.data;
-      renderTable();
-    } else {
-      console.error('Failed to load resources');
-    }
-  } catch (error) {
-    console.error('Error fetching resources:', error);
-  }
-}
-
-/**
- * Handle the form submission for adding a new resource.
- */
 async function handleAddResource(event) {
   event.preventDefault();
 
-  const title = document.getElementById('resource-title').value;
-  const description = document.getElementById('resource-description').value;
-  const link = document.getElementById('resource-link').value;
+  const title = document.getElementById("resource-title").value;
+  const description = document.getElementById("resource-description").value;
+  const link = document.getElementById("resource-link").value;
 
-  const response = await fetch('./api/index.php', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ title: title, description: description, link: link }),
-  });
+  if (editingId) {
 
-  const data = await response.json();
-  if (data.success) {
-    resources.push({ id: data.id, title: title, description: description, link: link });
-    renderTable();
-    resourceForm.reset();
+    const response = await fetch("./api/index.php", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: editingId,
+        title,
+        description,
+        link
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      resources = resources.map(resource => {
+        if (resource.id == editingId) {
+          return {
+            id: editingId,
+            title,
+            description,
+            link
+          };
+        }
+
+        return resource;
+      });
+
+      renderTable();
+
+      resourceForm.reset();
+
+      document.getElementById("add-resource").textContent = "Add Resource";
+
+      editingId = null;
+    }
+
   } else {
-    console.error('Failed to add resource');
+
+    const response = await fetch("./api/index.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        title,
+        description,
+        link
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      resources.push({
+        id: result.id,
+        title,
+        description,
+        link
+      });
+
+      renderTable();
+
+      resourceForm.reset();
+    }
   }
 }
 
-/**
- * Handle the click event for editing or deleting a resource.
- */
 async function handleTableClick(event) {
-  const button = event.target;
-  const id = button.getAttribute('data-id');
+  const target = event.target;
+  const id = target.dataset.id;
 
-  if (button.classList.contains('delete-btn')) {
-    await handleDeleteResource(id);
+  if (target.classList.contains("delete-btn")) {
+
+    const response = await fetch(`./api/index.php?id=${id}`, {
+      method: "DELETE"
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      resources = resources.filter(resource => resource.id != id);
+      renderTable();
+    }
   }
 
-  if (button.classList.contains('edit-btn')) {
-    const resource = resources.find(function(r) { return r.id == id; });
-    document.getElementById('resource-title').value = resource.title;
-    document.getElementById('resource-description').value = resource.description;
-    document.getElementById('resource-link').value = resource.link;
+  if (target.classList.contains("edit-btn")) {
 
-    const submitButton = document.getElementById('add-resource');
-    submitButton.textContent = 'Update Resource';
+    const resource = resources.find(resource => resource.id == id);
 
-    resourceForm.removeEventListener('submit', handleAddResource);
-    resourceForm.addEventListener('submit', function(e) { handleEditResource(e, resource); });
-  }
-}
+    document.getElementById("resource-title").value = resource.title;
+    document.getElementById("resource-description").value = resource.description;
+    document.getElementById("resource-link").value = resource.link;
 
-/**
- * Handle deleting a resource.
- */
-async function handleDeleteResource(id) {
-  const response = await fetch('./api/index.php?id=' + id, { method: 'DELETE' });
+    document.getElementById("add-resource").textContent = "Update Resource";
 
-  const data = await response.json();
-  if (data.success) {
-    resources = resources.filter(function(resource) { return resource.id != id; });
-    renderTable();
-  } else {
-    console.error('Failed to delete resource');
+    editingId = id;
   }
 }
 
-/**
- * Handle editing a resource.
- */
-async function handleEditResource(event, resource) {
-  event.preventDefault();
-
-  const title = document.getElementById('resource-title').value;
-  const description = document.getElementById('resource-description').value;
-  const link = document.getElementById('resource-link').value;
-
-  const response = await fetch('./api/index.php', {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ id: resource.id, title: title, description: description, link: link }),
-  });
-
-  const data = await response.json();
-  if (data.success) {
-    const updatedResource = { id: resource.id, title: title, description: description, link: link };
-    resources = resources.map(function(r) { return r.id == resource.id ? updatedResource : r; });
-    renderTable();
-    resourceForm.reset();
-    const submitButton = document.getElementById('add-resource');
-    submitButton.textContent = 'Add Resource';
-    resourceForm.removeEventListener('submit', function(e) { handleEditResource(e, resource); });
-    resourceForm.addEventListener('submit', handleAddResource);
-  } else {
-    console.error('Failed to update resource');
-  }
-}
-
-/**
- * Load and initialize the admin page
- */
 async function loadAndInitialize() {
-  await loadResources();
-  resourceForm.addEventListener('submit', handleAddResource);
-  resourcesTbody.addEventListener('click', handleTableClick);
+
+  const response = await fetch("./api/index.php");
+  const result = await response.json();
+
+  if (result.success) {
+    resources = result.data;
+  }
+
+  renderTable();
+
+  resourceForm.addEventListener("submit", handleAddResource);
+
+  resourcesTbody.addEventListener("click", handleTableClick);
 }
 
-// --- Initial Page Load ---
 loadAndInitialize();
