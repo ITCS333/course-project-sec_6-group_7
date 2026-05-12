@@ -1,4 +1,34 @@
 /**
+ * Create an article for each comment
+ */
+function createCommentArticle(comment) {
+  const article = document.createElement("article");
+
+  const commentText = document.createElement("p");
+  commentText.textContent = comment.text;
+  article.appendChild(commentText);
+
+  const footer = document.createElement("footer");
+  footer.textContent = `Posted by: ${comment.author}`;
+  article.appendChild(footer);
+
+  return article;
+}
+
+/**
+ * Render comments for a resource
+ */
+function renderComments(comments) {
+  const commentList = document.getElementById("comment-list");
+  commentList.innerHTML = ""; // Clear existing comments
+
+  comments.forEach((comment) => {
+    const commentArticle = createCommentArticle(comment);
+    commentList.appendChild(commentArticle);
+  });
+}
+
+/**
  * Handle the form submission for adding a new comment
  */
 async function handleAddComment(event) {
@@ -27,10 +57,3 @@ async function handleAddComment(event) {
     console.error("Failed to add comment");
   }
 }
-
-/**
- * Attach event listener to the comment form
- */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("comment-form").addEventListener("submit", handleAddComment);
-});
