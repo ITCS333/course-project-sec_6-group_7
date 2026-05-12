@@ -1,42 +1,59 @@
+/**
+ * Create an article for each comment
+ */
+function createCommentArticle(comment) {
+  const article = document.createElement("article");
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resource Details</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="details.js" defer></script>
-</head>
-<body>
+  const commentText = document.createElement("p");
+  commentText.textContent = comment.text;
+  article.appendChild(commentText);
 
-    <header>
-        <h1 id="resource-title">Resource Details</h1>
-    </header>
+  const footer = document.createElement("footer");
+  footer.textContent = `Posted by: ${comment.author}`;
+  article.appendChild(footer);
 
-    <main>
-        <article>
-            <p id="resource-description">Description will be here</p>
-            <a id="resource-link" href="#" target="_blank">Access Resource Material</a>
-        </article>
+  return article;
+}
 
-        <section id="discussion-forum">
-            <h2>Discussion</h2>
+/**
+ * Render comments for a resource
+ */
+function renderComments(comments) {
+  const commentList = document.getElementById("comment-list");
+  commentList.innerHTML = "";
 
-            <div id="comment-list">
-                <!-- Comments will be injected here dynamically by details.js -->
-            </div>
+  comments.forEach((comment) => {
+    const commentArticle = createCommentArticle(comment);
+    commentList.appendChild(commentArticle);
+  });
+}
 
-            <form id="comment-form">
-                <fieldset>
-                    <legend>Leave a Comment</legend>
-                    <label for="new-comment">Comment:</label>
-                    <textarea id="new-comment" required></textarea>
-                    <button type="submit">Post Comment</button>
-                </fieldset>
-            </form>
-        </section>
-    </main>
+/**
+ * Handle the form submission for adding a new comment
+ */
+async function handleAddComment(event) {
+  event.preventDefault();
+  const commentText = document.getElementById("new-comment").value.trim();
+  if (commentText === "") return;
 
-</body>
-</html>
+  const resourceId = new URLSearchParams(window.location.search).get("id");
+  const response = await fetch("./api/index.php?action=comment", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      resource_id: resourceId,
+      author: "Student",
+      text: commentText,
+    }),
+  });
+
+  const data = await response.json();
+  if (data.success) {
+    renderComments([data.comment]);
+    document.getElementById("new-comment").value = "";
+  } else {
+    console.error("Failed to add comment");
+  }
+}
