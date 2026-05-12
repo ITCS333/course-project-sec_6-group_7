@@ -13,7 +13,7 @@ function createResourceArticle(resource) {
   article.appendChild(description);
 
   const link = document.createElement("a");
-  link.href = `details.html?id=${resource.id}`;
+  link.href = `details.html?id=${resource.id}`;  // Corrected href
   link.textContent = "View Resource & Discussion";
   article.appendChild(link);
 
@@ -53,29 +53,36 @@ function getResourceIdFromURL() {
 }
 
 /**
+ * Initialize the page (load resource details and comments)
+ */
+async function initializePage() {
+  const resourceId = getResourceIdFromURL();
+  if (!resourceId) {
+    console.error("Resource ID not found in the URL.");
+    return;
+  }
+
+  // Load resource details and comments
+  const resourceResponse = await fetch(`./api/index.php?id=${resourceId}`);
+  const resourceData = await resourceResponse.json();
+  if (resourceData.success) {
+    renderResourceDetails(resourceData.data);
+  }
+
+  const commentsResponse = await fetch(`./api/index.php?resource_id=${resourceId}&action=comments`);
+  const commentsData = await commentsResponse.json();
+  if (commentsData.success) {
+    renderComments(commentsData.data);
+  }
+}
+
+/**
  * Render resource details on the page
  */
 function renderResourceDetails(resource) {
   document.getElementById("resource-title").textContent = resource.title;
   document.getElementById("resource-description").textContent = resource.description;
   document.getElementById("resource-link").href = resource.link;
-}
-
-/**
- * Create a comment article element
- */
-function createCommentArticle(comment) {
-  const article = document.createElement("article");
-
-  const commentText = document.createElement("p");
-  commentText.textContent = comment.text;
-  article.appendChild(commentText);
-
-  const footer = document.createElement("footer");
-  footer.textContent = `Posted by: ${comment.author}`;
-  article.appendChild(footer);
-
-  return article;
 }
 
 /**
@@ -122,37 +129,25 @@ async function handleAddComment(event) {
 }
 
 /**
- * Initialize the page (load resource details and comments)
+ * Create an article for each comment
  */
-async function initializePage() {
-  const resourceId = getResourceIdFromURL();
-  if (!resourceId) {
-    console.error("Resource ID not found in the URL.");
-    return;
-  }
+function createCommentArticle(comment) {
+  const article = document.createElement("article");
 
-  // Load resource details
-  const resourceResponse = await fetch(`./api/index.php?id=${resourceId}`);
-  const resourceData = await resourceResponse.json();
-  if (resourceData.success) {
-    renderResourceDetails(resourceData.data);
-  }
+  const commentText = document.createElement("p");
+  commentText.textContent = comment.text;
+  article.appendChild(commentText);
 
-  // Load comments
-  const commentsResponse = await fetch(`./api/index.php?resource_id=${resourceId}&action=comments`);
-  const commentsData = await commentsResponse.json();
-  if (commentsData.success) {
-    renderComments(commentsData.data);
-  }
+  const footer = document.createElement("footer");
+  footer.textContent = `Posted by: ${comment.author}`;
+  article.appendChild(footer);
+
+  return article;
 }
 
 /**
- * Initialize the page when the DOM is ready
+ * Attach event listener to the comment form
  */
 document.addEventListener("DOMContentLoaded", () => {
-  loadResources();
-  const form = document.getElementById("comment-form");
-  if (form) {
-    form.addEventListener("submit", handleAddComment);
-  }
+  document.getElementById("comment-form").addEventListener("submit", handleAddComment);
 });
