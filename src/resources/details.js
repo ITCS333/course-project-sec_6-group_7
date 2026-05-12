@@ -1,91 +1,36 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const resourceId = new URLSearchParams(window.location.search).get("id");
-    const resourceTitle = document.getElementById("resource-title");
-    const resourceDescription = document.getElementById("resource-description");
-    const resourceLink = document.getElementById("resource-link");
-    const commentList = document.getElementById("comment-list");
-    const commentForm = document.getElementById("comment-form");
-    const newCommentText = document.getElementById("new-comment");
+/**
+ * Handle the form submission for adding a new comment
+ */
+async function handleAddComment(event) {
+  event.preventDefault();
+  const commentText = document.getElementById("new-comment").value.trim();
+  if (commentText === "") return;  // Do nothing if the textarea is empty
 
-    async function loadResourceDetails() {
-        try {
-            const response = await fetch(`./api/index.php?id=${resourceId}`);
-            const data = await response.json();
+  const resourceId = new URLSearchParams(window.location.search).get("id");
+  const response = await fetch("./api/index.php?action=comment", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      resource_id: resourceId,
+      author: "Student", // Hardcoded author for simplicity
+      text: commentText,
+    }),
+  });
 
-            if (data.success) {
-                const resource = data.data;
-                resourceTitle.textContent = resource.title;
-                resourceDescription.textContent = resource.description;
-                resourceLink.href = resource.link;
-                resourceLink.textContent = "Access Resource Material";
-                loadComments(resource.id);
-            } else {
-                console.error("Failed to load resource details");
-            }
-        } catch (error) {
-            console.error("Error fetching resource details:", error);
-        }
-    }
+  const data = await response.json();
+  if (data.success) {
+    renderComments([data.comment]);
+    document.getElementById("new-comment").value = ""; // Clear the comment box
+  } else {
+    console.error("Failed to add comment");
+  }
+}
 
-    async function loadComments(resourceId) {
-        try {
-            const response = await fetch(`./api/index.php?resource_id=${resourceId}&action=comments`);
-            const data = await response.json();
-
-            if (data.success) {
-                commentList.innerHTML = "";  // Clear existing comments
-                data.data.forEach((comment) => {
-                    const commentArticle = document.createElement("article");
-
-                    const commentText = document.createElement("p");
-                    commentText.textContent = comment.text;
-                    commentArticle.appendChild(commentText);
-
-                    const footer = document.createElement("footer");
-                    footer.textContent = `Posted by: ${comment.author}`;
-                    commentArticle.appendChild(footer);
-
-                    commentList.appendChild(commentArticle);
-                });
-            }
-        } catch (error) {
-            console.error("Error fetching comments:", error);
-        }
-    }
-
-    async function handleCommentSubmit(event) {
-        event.preventDefault();
-
-        const commentText = newCommentText.value.trim();
-        if (!commentText) return;
-
-        try {
-            const response = await fetch("./api/index.php?action=comment", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    resource_id: resourceId,
-                    author: "Student",
-                    text: commentText,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                loadComments(resourceId);  // Reload comments
-                newCommentText.value = "";  // Clear textarea
-            } else {
-                console.error("Failed to post comment");
-            }
-        } catch (error) {
-            console.error("Error posting comment:", error);
-        }
-    }
-
-    commentForm.addEventListener("submit", handleCommentSubmit);
-
-    loadResourceDetails();
+/**
+ * Attach event listener to the comment form
+ */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("comment-form").addEventListener("submit", handleAddComment);
 });
