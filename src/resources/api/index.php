@@ -4,13 +4,13 @@ require_once './config/Database.php';
 $database = new Database();
 $db = $database->getConnection();
 
-// Set the response headers
+// Set response headers
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-// Handle the HTTP request method
+// Handle the request method
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
@@ -36,6 +36,8 @@ switch ($method) {
         echo json_encode(['message' => 'Method Not Allowed']);
         break;
 }
+
+// Functions for CRUD operations
 
 function getAllResources($db) {
     $query = "SELECT id, title, description, link FROM resources";
