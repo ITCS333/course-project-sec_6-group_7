@@ -20,7 +20,7 @@ function createCommentArticle(comment) {
  */
 function renderComments(comments) {
   const commentList = document.getElementById("comment-list");
-  commentList.innerHTML = ""; // Clear existing comments
+  commentList.innerHTML = "";
 
   comments.forEach((comment) => {
     const commentArticle = createCommentArticle(comment);
@@ -34,7 +34,7 @@ function renderComments(comments) {
 async function handleAddComment(event) {
   event.preventDefault();
   const commentText = document.getElementById("new-comment").value.trim();
-  if (commentText === "") return;  // Do nothing if the textarea is empty
+  if (commentText === "") return;
 
   const resourceId = new URLSearchParams(window.location.search).get("id");
   const response = await fetch("./api/index.php?action=comment", {
@@ -44,7 +44,7 @@ async function handleAddComment(event) {
     },
     body: JSON.stringify({
       resource_id: resourceId,
-      author: "Student", // Hardcoded for now
+      author: "Student",
       text: commentText,
     }),
   });
@@ -52,7 +52,7 @@ async function handleAddComment(event) {
   const data = await response.json();
   if (data.success) {
     renderComments([data.comment]);
-    document.getElementById("new-comment").value = ""; // Clear the comment box after posting
+    document.getElementById("new-comment").value = "";
   } else {
     console.error("Failed to add comment");
   }
