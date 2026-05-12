@@ -13,7 +13,7 @@ function createResourceArticle(resource) {
   article.appendChild(description);
 
   const link = document.createElement("a");
-  link.href = `details.html?id=${resource.id}`;  // Corrected href
+  link.href = `details.html?id=${resource.id}`;  // Corrected href to match the expected format
   link.textContent = "View Resource & Discussion";
   article.appendChild(link);
 
@@ -122,7 +122,7 @@ async function handleAddComment(event) {
   const data = await response.json();
   if (data.success) {
     renderComments([data.comment]);
-    document.getElementById("new-comment").value = ""; // Clear the comment box
+    document.getElementById("new-comment").value = ""; // Clear the comment box after posting
   } else {
     console.error("Failed to add comment");
   }
