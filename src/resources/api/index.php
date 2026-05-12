@@ -1,8 +1,5 @@
 <?php
-// Include the database connection
-require_once './config/Database.php';
-
-// Set response headers FIRST, before any output
+// Set response headers FIRST - before any output
 header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -14,34 +11,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Initialize database connection
-try {
-    $database = new Database();
-    $db = $database->getConnection();
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Database connection failed']);
-    exit();
-}
+// Include the database connection
+require_once './config/Database.php';
+$database = new Database();
+$db = $database->getConnection();
 
 // Handle the request method
 $method = $_SERVER['REQUEST_METHOD'];
-
-// Parse the action parameter
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
 switch ($method) {
     case 'GET':
-        // Handle different GET actions
+        // Handle comments request
         if ($action === 'comments' && isset($_GET['resource_id'])) {
             getComments($db, $_GET['resource_id']);
         }
+        // Handle search
         elseif ($action === 'search' && isset($_GET['q'])) {
             searchResources($db, $_GET['q']);
         }
+        // Handle single resource
         elseif (isset($_GET['id'])) {
             getResourceById($db, $_GET['id']);
         }
+        // Get all resources
         else {
             getAllResources($db);
         }
@@ -49,7 +42,6 @@ switch ($method) {
         
     case 'POST':
         $input = json_decode(file_get_contents('php://input'), true);
-        
         // Handle comment creation
         if ($action === 'comment') {
             addComment($db, $input);
@@ -61,8 +53,7 @@ switch ($method) {
         break;
         
     case 'PUT':
-        $input = json_decode(file_get_contents('php://input'), true);
-        updateResource($db, $input);
+        updateResource($db, json_decode(file_get_contents('php://input'), true));
         break;
         
     case 'DELETE':
@@ -74,375 +65,223 @@ switch ($method) {
         elseif (isset($_GET['id'])) {
             deleteResource($db, $_GET['id']);
         }
-        else {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Missing resource ID']);
-        }
         break;
         
     default:
         http_response_code(405);
-        echo json_encode(['success' => false, 'message' => 'Method Not Allowed']);
+        echo json_encode(['message' => 'Method Not Allowed']);
         break;
 }
 
-/**
- * Get all resources
- */
+// Functions for CRUD operations
+
 function getAllResources($db) {
-    try {
-        $query = "SELECT id, title, description, link FROM resources ORDER BY id DESC";
-        $stmt = $db->prepare($query);
-        $stmt->execute();
-        $resources = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        http_response_code(200);
-        echo json_encode(['success' => true, 'data' => $resources]);
-    } catch (PDOException $e) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
-    }
+    $query = "SELECT id, title, description, link FROM resources";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+    $resources = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode(['success' => true, 'data' => $resources]);
 }
 
-/**
- * Get a single resource by ID
- */
+function searchResources($db, $q) {
+    $query = "SELECT id, title, description, link FROM resources WHERE title LIKE :q OR description LIKE :q2";
+    $searchTerm = "%$q%";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':q', $searchTerm);
+    $stmt->bindParam(':q2', $searchTerm);
+    $stmt->execute();
+    $resources = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode(['success' => true, 'data' => $resources]);
+}
+
 function getResourceById($db, $id) {
-    try {
-        $query = "SELECT id, title, description, link FROM resources WHERE id = :id";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        $resource = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($resource) {
-            http_response_code(200);
-            echo json_encode(['success' => true, 'data' => $resource]);
-        } else {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'Resource not found']);
-        }
-    } catch (PDOException $e) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    $query = "SELECT id, title, description, link FROM resources WHERE id = :id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+    $resource = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($resource) {
+        echo json_encode(['success' => true, 'data' => $resource]);
+    } else {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Resource not found']);
     }
 }
 
-/**
- * Search resources by title or description
- */
-function searchResources($db, $query) {
-    try {
-        $searchQuery = "%" . $query . "%";
-        $sql = "SELECT id, title, description, link FROM resources 
-                WHERE title LIKE :query OR description LIKE :query2 
-                ORDER BY id DESC";
-        $stmt = $db->prepare($sql);
-        $stmt->bindParam(':query', $searchQuery);
-        $stmt->bindParam(':query2', $searchQuery);
-        $stmt->execute();
-        $resources = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        http_response_code(200);
-        echo json_encode(['success' => true, 'data' => $resources]);
-    } catch (PDOException $e) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
-    }
-}
-
-/**
- * Create a new resource
- */
 function createResource($db, $data) {
-    try {
-        // Validate required fields
-        if (!isset($data['title']) || empty(trim($data['title']))) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Title is required']);
-            return;
-        }
-        
-        if (!isset($data['link']) || empty(trim($data['link']))) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Link is required']);
-            return;
-        }
-        
-        // Validate URL format
-        if (!filter_var($data['link'], FILTER_VALIDATE_URL)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Invalid URL format']);
-            return;
-        }
-        
-        $title = trim($data['title']);
-        $description = isset($data['description']) ? trim($data['description']) : '';
-        $link = trim($data['link']);
-        
-        $query = "INSERT INTO resources (title, description, link) VALUES (:title, :description, :link)";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':title', $title);
-        $stmt->bindParam(':description', $description);
-        $stmt->bindParam(':link', $link);
-        
-        if ($stmt->execute()) {
-            $newId = $db->lastInsertId();
-            http_response_code(201);
-            echo json_encode([
-                'success' => true, 
-                'id' => $newId, 
-                'message' => 'Resource created successfully'
-            ]);
-        } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Failed to create resource']);
-        }
-    } catch (PDOException $e) {
+    // Validate required fields
+    if (!isset($data['title']) || empty(trim($data['title']))) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Title is required']);
+        return;
+    }
+    if (!isset($data['link']) || empty(trim($data['link']))) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Link is required']);
+        return;
+    }
+    if (!filter_var($data['link'], FILTER_VALIDATE_URL)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Invalid URL format']);
+        return;
+    }
+    
+    $query = "INSERT INTO resources (title, description, link) VALUES (:title, :description, :link)";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':title', $data['title']);
+    $stmt->bindParam(':description', $data['description']);
+    $stmt->bindParam(':link', $data['link']);
+    
+    if ($stmt->execute()) {
+        $newId = $db->lastInsertId();
+        http_response_code(201);
+        echo json_encode(['success' => true, 'id' => $newId]);
+    } else {
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Failed to create resource']);
     }
 }
 
-/**
- * Update an existing resource
- */
 function updateResource($db, $data) {
-    try {
-        // Validate required fields
-        if (!isset($data['id']) || empty($data['id'])) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Resource ID is required']);
-            return;
-        }
-        
-        if (!isset($data['title']) || empty(trim($data['title']))) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Title is required']);
-            return;
-        }
-        
-        if (!isset($data['link']) || empty(trim($data['link']))) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Link is required']);
-            return;
-        }
-        
-        // Validate URL format
-        if (!filter_var($data['link'], FILTER_VALIDATE_URL)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Invalid URL format']);
-            return;
-        }
-        
-        $id = $data['id'];
-        $title = trim($data['title']);
-        $description = isset($data['description']) ? trim($data['description']) : '';
-        $link = trim($data['link']);
-        
-        // Check if resource exists
-        $checkQuery = "SELECT id FROM resources WHERE id = :id";
-        $checkStmt = $db->prepare($checkQuery);
-        $checkStmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $checkStmt->execute();
-        
-        if ($checkStmt->rowCount() === 0) {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'Resource not found']);
-            return;
-        }
-        
-        $query = "UPDATE resources SET title = :title, description = :description, link = :link WHERE id = :id";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->bindParam(':title', $title);
-        $stmt->bindParam(':description', $description);
-        $stmt->bindParam(':link', $link);
-        
-        if ($stmt->execute()) {
-            http_response_code(200);
-            echo json_encode(['success' => true, 'message' => 'Resource updated successfully']);
-        } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Failed to update resource']);
-        }
-    } catch (PDOException $e) {
+    // Validate required fields
+    if (!isset($data['id']) || !isset($data['title']) || !isset($data['link'])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+        return;
+    }
+    if (!filter_var($data['link'], FILTER_VALIDATE_URL)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Invalid URL format']);
+        return;
+    }
+    
+    // Check if resource exists
+    $checkQuery = "SELECT id FROM resources WHERE id = :id";
+    $checkStmt = $db->prepare($checkQuery);
+    $checkStmt->bindParam(':id', $data['id']);
+    $checkStmt->execute();
+    if ($checkStmt->rowCount() === 0) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Resource not found']);
+        return;
+    }
+    
+    $query = "UPDATE resources SET title = :title, description = :description, link = :link WHERE id = :id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':id', $data['id']);
+    $stmt->bindParam(':title', $data['title']);
+    $stmt->bindParam(':description', $data['description']);
+    $stmt->bindParam(':link', $data['link']);
+    
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Resource updated']);
+    } else {
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Failed to update resource']);
     }
 }
 
-/**
- * Delete a resource
- */
 function deleteResource($db, $id) {
-    try {
-        // Check if resource exists
-        $checkQuery = "SELECT id FROM resources WHERE id = :id";
-        $checkStmt = $db->prepare($checkQuery);
-        $checkStmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $checkStmt->execute();
-        
-        if ($checkStmt->rowCount() === 0) {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'Resource not found']);
-            return;
-        }
-        
-        $query = "DELETE FROM resources WHERE id = :id";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        
-        if ($stmt->execute()) {
-            http_response_code(200);
-            echo json_encode(['success' => true, 'message' => 'Resource deleted successfully']);
-        } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Failed to delete resource']);
-        }
-    } catch (PDOException $e) {
+    // Check if resource exists
+    $checkQuery = "SELECT id FROM resources WHERE id = :id";
+    $checkStmt = $db->prepare($checkQuery);
+    $checkStmt->bindParam(':id', $id);
+    $checkStmt->execute();
+    if ($checkStmt->rowCount() === 0) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Resource not found']);
+        return;
+    }
+    
+    $query = "DELETE FROM resources WHERE id = :id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':id', $id);
+    
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Resource deleted']);
+    } else {
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Failed to delete resource']);
     }
 }
 
-/**
- * Get comments for a resource
- */
 function getComments($db, $resourceId) {
-    try {
-        // Check if resource exists
-        $checkQuery = "SELECT id FROM resources WHERE id = :id";
-        $checkStmt = $db->prepare($checkQuery);
-        $checkStmt->bindParam(':id', $resourceId, PDO::PARAM_INT);
-        $checkStmt->execute();
-        
-        if ($checkStmt->rowCount() === 0) {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'Resource not found']);
-            return;
-        }
-        
-        $query = "SELECT id, resource_id, author, text, created_at 
-                  FROM comments 
-                  WHERE resource_id = :resource_id 
-                  ORDER BY created_at DESC";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':resource_id', $resourceId, PDO::PARAM_INT);
-        $stmt->execute();
-        $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        http_response_code(200);
-        echo json_encode(['success' => true, 'data' => $comments]);
-    } catch (PDOException $e) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
-    }
+    $query = "SELECT id, resource_id, author, text, created_at FROM comments WHERE resource_id = :resource_id ORDER BY created_at DESC";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':resource_id', $resourceId);
+    $stmt->execute();
+    $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo json_encode(['success' => true, 'data' => $comments]);
 }
 
-/**
- * Add a comment to a resource
- */
 function addComment($db, $data) {
-    try {
-        // Validate required fields
-        if (!isset($data['resource_id']) || empty($data['resource_id'])) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Resource ID is required']);
-            return;
-        }
+    // Validate required fields
+    if (!isset($data['resource_id']) || !isset($data['author']) || !isset($data['text'])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Missing required fields']);
+        return;
+    }
+    if (empty(trim($data['text']))) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Comment text is required']);
+        return;
+    }
+    
+    // Check if resource exists
+    $checkQuery = "SELECT id FROM resources WHERE id = :id";
+    $checkStmt = $db->prepare($checkQuery);
+    $checkStmt->bindParam(':id', $data['resource_id']);
+    $checkStmt->execute();
+    if ($checkStmt->rowCount() === 0) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Resource not found']);
+        return;
+    }
+    
+    $query = "INSERT INTO comments (resource_id, author, text) VALUES (:resource_id, :author, :text)";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':resource_id', $data['resource_id']);
+    $stmt->bindParam(':author', $data['author']);
+    $stmt->bindParam(':text', $data['text']);
+    
+    if ($stmt->execute()) {
+        $newId = $db->lastInsertId();
+        $fetchQuery = "SELECT id, resource_id, author, text, created_at FROM comments WHERE id = :id";
+        $fetchStmt = $db->prepare($fetchQuery);
+        $fetchStmt->bindParam(':id', $newId);
+        $fetchStmt->execute();
+        $comment = $fetchStmt->fetch(PDO::FETCH_ASSOC);
         
-        if (!isset($data['text']) || empty(trim($data['text']))) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Comment text is required']);
-            return;
-        }
-        
-        if (!isset($data['author']) || empty(trim($data['author']))) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Author is required']);
-            return;
-        }
-        
-        $resourceId = $data['resource_id'];
-        $author = trim($data['author']);
-        $text = trim($data['text']);
-        
-        // Check if resource exists
-        $checkQuery = "SELECT id FROM resources WHERE id = :id";
-        $checkStmt = $db->prepare($checkQuery);
-        $checkStmt->bindParam(':id', $resourceId, PDO::PARAM_INT);
-        $checkStmt->execute();
-        
-        if ($checkStmt->rowCount() === 0) {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'Resource not found']);
-            return;
-        }
-        
-        $query = "INSERT INTO comments (resource_id, author, text) VALUES (:resource_id, :author, :text)";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':resource_id', $resourceId, PDO::PARAM_INT);
-        $stmt->bindParam(':author', $author);
-        $stmt->bindParam(':text', $text);
-        
-        if ($stmt->execute()) {
-            $newId = $db->lastInsertId();
-            
-            // Fetch the newly created comment
-            $fetchQuery = "SELECT id, resource_id, author, text, created_at FROM comments WHERE id = :id";
-            $fetchStmt = $db->prepare($fetchQuery);
-            $fetchStmt->bindParam(':id', $newId, PDO::PARAM_INT);
-            $fetchStmt->execute();
-            $comment = $fetchStmt->fetch(PDO::FETCH_ASSOC);
-            
-            http_response_code(201);
-            echo json_encode([
-                'success' => true, 
-                'comment' => $comment,
-                'message' => 'Comment added successfully'
-            ]);
-        } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Failed to add comment']);
-        }
-    } catch (PDOException $e) {
+        http_response_code(201);
+        echo json_encode(['success' => true, 'comment' => $comment]);
+    } else {
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Failed to add comment']);
     }
 }
 
-/**
- * Delete a comment
- */
 function deleteComment($db, $id) {
-    try {
-        // Check if comment exists
-        $checkQuery = "SELECT id FROM comments WHERE id = :id";
-        $checkStmt = $db->prepare($checkQuery);
-        $checkStmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $checkStmt->execute();
-        
-        if ($checkStmt->rowCount() === 0) {
-            http_response_code(404);
-            echo json_encode(['success' => false, 'message' => 'Comment not found']);
-            return;
-        }
-        
-        $query = "DELETE FROM comments WHERE id = :id";
-        $stmt = $db->prepare($query);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        
-        if ($stmt->execute()) {
-            http_response_code(200);
-            echo json_encode(['success' => true, 'message' => 'Comment deleted successfully']);
-        } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Failed to delete comment']);
-        }
-    } catch (PDOException $e) {
+    // Check if comment exists
+    $checkQuery = "SELECT id FROM comments WHERE id = :id";
+    $checkStmt = $db->prepare($checkQuery);
+    $checkStmt->bindParam(':id', $id);
+    $checkStmt->execute();
+    if ($checkStmt->rowCount() === 0) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Comment not found']);
+        return;
+    }
+    
+    $query = "DELETE FROM comments WHERE id = :id";
+    $stmt = $db->prepare($query);
+    $stmt->bindParam(':id', $id);
+    
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Comment deleted']);
+    } else {
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Failed to delete comment']);
     }
 }
 ?>
