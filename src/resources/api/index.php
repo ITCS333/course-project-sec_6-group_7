@@ -1,16 +1,13 @@
 <?php
-// Include the database connection
 require_once './config/Database.php';
 $database = new Database();
 $db = $database->getConnection();
 
-// Set response headers
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 
-// Handle the request method
 $method = $_SERVER['REQUEST_METHOD'];
 
 switch ($method) {
@@ -67,7 +64,7 @@ function createResource($db, $data) {
     $stmt->bindParam(':title', $data['title']);
     $stmt->bindParam(':description', $data['description']);
     $stmt->bindParam(':link', $data['link']);
-    
+
     if ($stmt->execute()) {
         $newId = $db->lastInsertId();
         echo json_encode(['success' => true, 'id' => $newId]);
@@ -83,7 +80,7 @@ function updateResource($db, $data) {
     $stmt->bindParam(':title', $data['title']);
     $stmt->bindParam(':description', $data['description']);
     $stmt->bindParam(':link', $data['link']);
-    
+
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Resource updated']);
     } else {
@@ -95,7 +92,7 @@ function deleteResource($db, $id) {
     $query = "DELETE FROM resources WHERE id = :id";
     $stmt = $db->prepare($query);
     $stmt->bindParam(':id', $id);
-    
+
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Resource deleted']);
     } else {
