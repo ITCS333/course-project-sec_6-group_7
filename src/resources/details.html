@@ -1,55 +1,42 @@
-/**
- * Handle the form submission for adding a new comment
- */
-async function handleAddComment(event) {
-  event.preventDefault();
-  const commentText = document.getElementById("new-comment").value.trim();
-  if (commentText === "") return;  // Do nothing if the textarea is empty
 
-  const resourceId = new URLSearchParams(window.location.search).get("id");
-  const response = await fetch("./api/index.php?action=comment", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      resource_id: resourceId,
-      author: "Student", // Hardcoded author for simplicity
-      text: commentText,
-    }),
-  });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Details</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="details.js" defer></script>
+</head>
+<body>
 
-  const data = await response.json();
-  if (data.success) {
-    // Create and append the new comment
-    const commentArticle = createCommentArticle(data.comment);
-    document.getElementById("comment-list").appendChild(commentArticle);
-    document.getElementById("new-comment").value = ""; // Clear the comment box
-  } else {
-    console.error("Failed to add comment");
-  }
-}
+    <header>
+        <h1 id="resource-title">Resource Details</h1>
+    </header>
 
-/**
- * Create a comment article element
- */
-function createCommentArticle(comment) {
-  const article = document.createElement("article");
-  
-  const commentText = document.createElement("p");
-  commentText.textContent = comment.text;
-  article.appendChild(commentText);
-  
-  const footer = document.createElement("footer");
-  footer.textContent = "Posted by: " + comment.author;
-  article.appendChild(footer);
-  
-  return article;
-}
+    <main>
+        <article>
+            <p id="resource-description">Description will be here</p>
+            <a id="resource-link" href="#" target="_blank">Access Resource Material</a>
+        </article>
 
-/**
- * Attach event listener to the comment form
- */
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("comment-form").addEventListener("submit", handleAddComment);
-});
+        <section id="discussion-forum">
+            <h2>Discussion</h2>
+
+            <div id="comment-list">
+                <!-- Comments will be injected here dynamically by details.js -->
+            </div>
+
+            <form id="comment-form">
+                <fieldset>
+                    <legend>Leave a Comment</legend>
+                    <label for="new-comment">Comment:</label>
+                    <textarea id="new-comment" required></textarea>
+                    <button type="submit">Post Comment</button>
+                </fieldset>
+            </form>
+        </section>
+    </main>
+
+</body>
+</html>
