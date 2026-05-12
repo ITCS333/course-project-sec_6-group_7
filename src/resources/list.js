@@ -13,6 +13,7 @@
 
 // --- Element Selections ---
 // TODO: Select the section for the resource list ('#resource-list-section').
+const resourceListSection = document.getElementById('resource-list-section');
 
 // --- Functions ---
 
@@ -24,7 +25,25 @@
  * `details.html?id=${id}` so the detail page knows which resource to load.
  */
 function createResourceArticle(resource) {
-  // ... your implementation here ...
+  const article = document.createElement('article');
+
+  // Create and append resource title (h2 or h3)
+  const title = document.createElement('h3');
+  title.textContent = resource.title;
+  article.appendChild(title);
+
+  // Create and append resource description (p)
+  const description = document.createElement('p');
+  description.textContent = resource.description;
+  article.appendChild(description);
+
+  // Create and append link to detail page
+  const link = document.createElement('a');
+  link.href = `details.html?id=${resource.id}`;
+  link.textContent = 'View Resource & Discussion';
+  article.appendChild(link);
+
+  return article;
 }
 
 /**
@@ -40,7 +59,26 @@ function createResourceArticle(resource) {
  *    - Append the returned <article> element to the list section.
  */
 async function loadResources() {
-  // ... your implementation here ...
+  try {
+    // Fetch data from the API
+    const response = await fetch('./api/index.php');
+    const data = await response.json();
+
+    if (data.success) {
+      // Clear existing content in the section
+      resourceListSection.innerHTML = '';
+
+      // Loop through resources and create an article for each
+      data.data.forEach(resource => {
+        const resourceArticle = createResourceArticle(resource);
+        resourceListSection.appendChild(resourceArticle);
+      });
+    } else {
+      console.error('Failed to load resources');
+    }
+  } catch (error) {
+    console.error('Error fetching resources:', error);
+  }
 }
 
 // --- Initial Page Load ---
