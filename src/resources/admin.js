@@ -1,5 +1,5 @@
 
-let resources = [];
+var resources = [];
 
 const resourceForm = document.getElementById("resource-form");
 
