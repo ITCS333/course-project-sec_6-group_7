@@ -63,6 +63,7 @@ function renderTable() {
   resources.forEach(resource => {
     const row = createResourceRow(resource);
     resourcesTbody.appendChild(row);
+  });  // Fixed: Added missing closing parenthesis
 }
 
 /**
@@ -127,7 +128,7 @@ async function handleTableClick(event) {
   }
 
   if (button.classList.contains('edit-btn')) {
-    const resource = resources.find(r => r.id === id);
+    const resource = resources.find(r => r.id == id);
     document.getElementById('resource-title').value = resource.title;
     document.getElementById('resource-description').value = resource.description;
     document.getElementById('resource-link').value = resource.link;
@@ -178,7 +179,7 @@ async function handleEditResource(event, resource) {
   const data = await response.json();
   if (data.success) {
     const updatedResource = { id: resource.id, title, description, link };
-    resources = resources.map(r => (r.id === resource.id ? updatedResource : r));
+    resources = resources.map(r => (r.id == resource.id ? updatedResource : r));
     renderTable();
     resourceForm.reset();
     const submitButton = document.getElementById('add-resource');
@@ -190,9 +191,14 @@ async function handleEditResource(event, resource) {
   }
 }
 
-// --- Initial Page Load ---
-loadResources();
+/**
+ * Load and initialize the page
+ */
+function loadAndInitialize() {
+  loadResources();
+  resourceForm.addEventListener('submit', handleAddResource);
+  resourcesTbody.addEventListener('click', handleTableClick);
+}
 
-// --- Event Listeners ---
-resourceForm.addEventListener('submit', handleAddResource);
-resourcesTbody.addEventListener('click', handleTableClick);
+// --- Initial Page Load ---
+loadAndInitialize();
