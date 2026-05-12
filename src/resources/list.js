@@ -13,7 +13,7 @@ function createResourceArticle(resource) {
   article.appendChild(description);
 
   const link = document.createElement("a");
-  link.href = `details.html?id=${resource.id}`;  // Corrected href
+  link.href = "details.html?id=" + resource.id;
   link.textContent = "View Resource & Discussion";
   article.appendChild(link);
 
@@ -53,6 +53,23 @@ function getResourceIdFromURL() {
 }
 
 /**
+ * Create a comment article element
+ */
+function createCommentArticle(comment) {
+  const article = document.createElement("article");
+  
+  const commentText = document.createElement("p");
+  commentText.textContent = comment.text;
+  article.appendChild(commentText);
+  
+  const footer = document.createElement("footer");
+  footer.textContent = "Posted by: " + comment.author;
+  article.appendChild(footer);
+  
+  return article;
+}
+
+/**
  * Initialize the page (load resource details and comments)
  */
 async function initializePage() {
@@ -63,13 +80,13 @@ async function initializePage() {
   }
 
   // Load resource details and comments
-  const resourceResponse = await fetch(`./api/index.php?id=${resourceId}`);
+  const resourceResponse = await fetch("./api/index.php?id=" + resourceId);
   const resourceData = await resourceResponse.json();
   if (resourceData.success) {
     renderResourceDetails(resourceData.data);
   }
 
-  const commentsResponse = await fetch(`./api/index.php?resource_id=${resourceId}&action=comments`);
+  const commentsResponse = await fetch("./api/index.php?resource_id=" + resourceId + "&action=comments");
   const commentsData = await commentsResponse.json();
   if (commentsData.success) {
     renderComments(commentsData.data);
@@ -99,55 +116,8 @@ function renderComments(comments) {
 }
 
 /**
- * Handle the form submission for adding a new comment
- */
-async function handleAddComment(event) {
-  event.preventDefault();
-  const commentText = document.getElementById("new-comment").value.trim();
-  if (commentText === "") return;  // Do nothing if the textarea is empty
-
-  const resourceId = new URLSearchParams(window.location.search).get("id");
-  const response = await fetch("./api/index.php?action=comment", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      resource_id: resourceId,
-      author: "Student", // Hardcoded author for simplicity
-      text: commentText,
-    }),
-  });
-
-  const data = await response.json();
-  if (data.success) {
-    renderComments([data.comment]);
-    document.getElementById("new-comment").value = ""; // Clear the comment box
-  } else {
-    console.error("Failed to add comment");
-  }
-}
-
-/**
- * Create an article for each comment
- */
-function createCommentArticle(comment) {
-  const article = document.createElement("article");
-
-  const commentText = document.createElement("p");
-  commentText.textContent = comment.text;
-  article.appendChild(commentText);
-
-  const footer = document.createElement("footer");
-  footer.textContent = `Posted by: ${comment.author}`;
-  article.appendChild(footer);
-
-  return article;
-}
-
-/**
- * Attach event listener to the comment form
+ * Initialize the page when the DOM is ready
  */
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("comment-form").addEventListener("submit", handleAddComment);
+  initializePage();
 });
