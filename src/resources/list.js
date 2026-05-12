@@ -1,86 +1,37 @@
-/*
-  Requirement: Populate the "Course Resources" list page.
+document.addEventListener("DOMContentLoaded", function () {
+    const resourceListSection = document.getElementById("resource-list-section");
 
-  Instructions:
-  1. Link this file to `list.html` using:
-     <script src="list.js" defer></script>
+    async function loadResources() {
+        try {
+            const response = await fetch("./api/index.php");
+            const data = await response.json();
 
-  2. In `list.html`, add id="resource-list-section" to the
-     <section> element that will contain the resource articles.
+            if (data.success) {
+                data.data.forEach((resource) => {
+                    const resourceArticle = document.createElement("article");
 
-  3. Implement the TODOs below.
-*/
+                    const title = document.createElement("h3");
+                    title.textContent = resource.title;
+                    resourceArticle.appendChild(title);
 
-// --- Element Selections ---
-// TODO: Select the section for the resource list ('#resource-list-section').
-const resourceListSection = document.getElementById('resource-list-section');
+                    const description = document.createElement("p");
+                    description.textContent = resource.description;
+                    resourceArticle.appendChild(description);
 
-// --- Functions ---
+                    const link = document.createElement("a");
+                    link.href = resource.link;
+                    link.textContent = "View Resource & Discussion";
+                    resourceArticle.appendChild(link);
 
-/**
- * TODO: Implement the createResourceArticle function.
- * It takes one resource object { id, title, description, link }.
- * It should return an <article> element matching the structure in `list.html`.
- * The "View Resource & Discussion" link's `href` MUST be set to
- * `details.html?id=${id}` so the detail page knows which resource to load.
- */
-function createResourceArticle(resource) {
-  const article = document.createElement('article');
-
-  // Create and append resource title (h2 or h3)
-  const title = document.createElement('h3');
-  title.textContent = resource.title;
-  article.appendChild(title);
-
-  // Create and append resource description (p)
-  const description = document.createElement('p');
-  description.textContent = resource.description;
-  article.appendChild(description);
-
-  // Create and append link to detail page
-  const link = document.createElement('a');
-  link.href = `details.html?id=${resource.id}`;
-  link.textContent = 'View Resource & Discussion';
-  article.appendChild(link);
-
-  return article;
-}
-
-/**
- * TODO: Implement the loadResources function.
- * This function must be 'async'.
- * It should:
- * 1. Use `fetch()` to GET data from the API endpoint:
- *    './api/index.php'
- * 2. Parse the JSON response. The API returns { success: true, data: [...] }.
- * 3. Clear any existing content from the list section.
- * 4. Loop through the resources array in `data`. For each resource:
- *    - Call `createResourceArticle()` with the resource object.
- *    - Append the returned <article> element to the list section.
- */
-async function loadResources() {
-  try {
-    // Fetch data from the API
-    const response = await fetch('./api/index.php');
-    const data = await response.json();
-
-    if (data.success) {
-      // Clear existing content in the section
-      resourceListSection.innerHTML = '';
-
-      // Loop through resources and create an article for each
-      data.data.forEach(resource => {
-        const resourceArticle = createResourceArticle(resource);
-        resourceListSection.appendChild(resourceArticle);
-      });
-    } else {
-      console.error('Failed to load resources');
+                    resourceListSection.appendChild(resourceArticle);
+                });
+            } else {
+                console.error("Failed to load resources");
+            }
+        } catch (error) {
+            console.error("Error fetching resources:", error);
+        }
     }
-  } catch (error) {
-    console.error('Error fetching resources:', error);
-  }
-}
 
-// --- Initial Page Load ---
-// Call the function to populate the page.
-loadResources();
+    loadResources();
+});
