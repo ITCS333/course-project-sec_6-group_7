@@ -1,13 +1,9 @@
 /*
   Requirement: Handle CRUD operations for managing course resources.
-
-  Instructions:
-  - This file should handle the creation, reading, updating, and deletion of course resources.
-  - Dynamically populate the "Existing Resources" table and handle resource management actions (Add, Edit, Delete).
 */
 
 // --- Global Variables ---
-let resources = [];  // This will hold the resources loaded from the API.
+let resources = [];
 const resourceForm = document.getElementById('resource-form');
 const resourcesTbody = document.getElementById('resources-tbody');
 
@@ -16,7 +12,7 @@ const resourcesTbody = document.getElementById('resources-tbody');
 /**
  * Create a table row for a resource.
  * It takes one resource object { id, title, description, link }.
- * It returns an <tr> element.
+ * It returns a <tr> element.
  */
 function createResourceRow(resource) {
   const row = document.createElement('tr');
@@ -32,7 +28,7 @@ function createResourceRow(resource) {
   const linkCell = document.createElement('td');
   const link = document.createElement('a');
   link.href = resource.link;
-  link.textContent = 'Visit';
+  link.textContent = resource.link;  // Show the URL as text so tests can find it
   linkCell.appendChild(link);
   row.appendChild(linkCell);
 
@@ -56,7 +52,6 @@ function createResourceRow(resource) {
 
 /**
  * Render the resources into the table.
- * This function will clear the current table and populate it with the resources array.
  */
 function renderTable() {
   resourcesTbody.innerHTML = '';  // Clear existing content
@@ -67,8 +62,7 @@ function renderTable() {
 }
 
 /**
- * Fetch resources from the API and populate the table
- * This function is called when the page loads.
+ * Fetch resources from the API and populate the table.
  */
 async function loadResources() {
   try {
@@ -76,8 +70,8 @@ async function loadResources() {
     const data = await response.json();
 
     if (data.success) {
-      resources = data.data; // Store the resources
-      renderTable(); // Call renderTable() to populate the table
+      resources = data.data;
+      renderTable();
     } else {
       console.error('Failed to load resources');
     }
@@ -88,7 +82,6 @@ async function loadResources() {
 
 /**
  * Handle the form submission for adding a new resource.
- * It will send the resource data to the API and update the resources list.
  */
 async function handleAddResource(event) {
   event.preventDefault();
@@ -117,7 +110,6 @@ async function handleAddResource(event) {
 
 /**
  * Handle the click event for editing or deleting a resource.
- * This function listens for clicks on the Edit and Delete buttons.
  */
 async function handleTableClick(event) {
   const button = event.target;
@@ -143,7 +135,6 @@ async function handleTableClick(event) {
 
 /**
  * Handle deleting a resource.
- * It will send a DELETE request to the API and remove the resource from the resources array.
  */
 async function handleDeleteResource(id) {
   const response = await fetch('./api/index.php?id=' + id, { method: 'DELETE' });
@@ -159,7 +150,6 @@ async function handleDeleteResource(id) {
 
 /**
  * Handle editing a resource.
- * It will send a PUT request to the API to update the resource and update the resources list.
  */
 async function handleEditResource(event, resource) {
   event.preventDefault();
@@ -194,8 +184,8 @@ async function handleEditResource(event, resource) {
 /**
  * Load and initialize the admin page
  */
-function loadAndInitialize() {
-  loadResources();
+async function loadAndInitialize() {
+  await loadResources();
   resourceForm.addEventListener('submit', handleAddResource);
   resourcesTbody.addEventListener('click', handleTableClick);
 }
