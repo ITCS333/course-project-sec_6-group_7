@@ -63,7 +63,6 @@ function renderTable() {
   resources.forEach(resource => {
     const row = createResourceRow(resource);
     resourcesTbody.appendChild(row);
-  });
 }
 
 /**
@@ -72,7 +71,7 @@ function renderTable() {
  */
 async function loadResources() {
   try {
-    const response = await fetch('./api/index.php');  // Fetch data from the API
+    const response = await fetch('./api/index.php');
     const data = await response.json();
 
     if (data.success) {
@@ -93,7 +92,7 @@ async function loadResources() {
 async function handleAddResource(event) {
   event.preventDefault();
 
-  const title = document.getElementById('new-resource-title').value;
+  const title = document.getElementById('resource-title').value;
   const description = document.getElementById('resource-description').value;
   const link = document.getElementById('resource-link').value;
 
@@ -129,11 +128,11 @@ async function handleTableClick(event) {
 
   if (button.classList.contains('edit-btn')) {
     const resource = resources.find(r => r.id === id);
-    document.getElementById('new-resource-title').value = resource.title;
+    document.getElementById('resource-title').value = resource.title;
     document.getElementById('resource-description').value = resource.description;
     document.getElementById('resource-link').value = resource.link;
 
-    const submitButton = document.getElementById('add-resource-btn');
+    const submitButton = document.getElementById('add-resource');
     submitButton.textContent = 'Update Resource';
 
     resourceForm.removeEventListener('submit', handleAddResource);
@@ -164,7 +163,7 @@ async function handleDeleteResource(id) {
 async function handleEditResource(event, resource) {
   event.preventDefault();
 
-  const title = document.getElementById('new-resource-title').value;
+  const title = document.getElementById('resource-title').value;
   const description = document.getElementById('resource-description').value;
   const link = document.getElementById('resource-link').value;
 
@@ -182,7 +181,7 @@ async function handleEditResource(event, resource) {
     resources = resources.map(r => (r.id === resource.id ? updatedResource : r));
     renderTable();
     resourceForm.reset();
-    const submitButton = document.getElementById('add-resource-btn');
+    const submitButton = document.getElementById('add-resource');
     submitButton.textContent = 'Add Resource';
     resourceForm.removeEventListener('submit', handleEditResource);
     resourceForm.addEventListener('submit', handleAddResource);
