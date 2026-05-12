@@ -1,3 +1,6 @@
+/**
+ * Create an article for each resource
+ */
 function createResourceArticle(resource) {
   const article = document.createElement("article");
 
@@ -10,13 +13,16 @@ function createResourceArticle(resource) {
   article.appendChild(description);
 
   const link = document.createElement("a");
-  link.href = `details.html?id=${resource.id}`;  // Corrected the href format
+  link.href = `details.html?id=${resource.id}`;  // Corrected href to the proper format
   link.textContent = "View Resource & Discussion";
   article.appendChild(link);
 
   return article;
 }
 
+/**
+ * Load resources and display them in the list
+ */
 async function loadResources() {
   try {
     const response = await fetch("./api/index.php");
@@ -38,11 +44,17 @@ async function loadResources() {
   }
 }
 
+/**
+ * Fetch the resource ID from the URL query string
+ */
 function getResourceIdFromURL() {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get("id");  // Correctly fetches the id from the URL query string
 }
 
+/**
+ * Initialize the page (load resource details and comments)
+ */
 async function initializePage() {
   const resourceId = getResourceIdFromURL();
   if (!resourceId) {
@@ -63,12 +75,18 @@ async function initializePage() {
   }
 }
 
+/**
+ * Render resource details on the page
+ */
 function renderResourceDetails(resource) {
   document.getElementById("resource-title").textContent = resource.title;
   document.getElementById("resource-description").textContent = resource.description;
   document.getElementById("resource-link").href = resource.link;
 }
 
+/**
+ * Render comments for a resource
+ */
 function renderComments(comments) {
   const commentList = document.getElementById("comment-list");
   commentList.innerHTML = ""; // Clear existing comments
@@ -79,6 +97,9 @@ function renderComments(comments) {
   });
 }
 
+/**
+ * Handle the form submission for adding a new comment
+ */
 async function handleAddComment(event) {
   event.preventDefault();
   const commentText = document.getElementById("new-comment").value.trim();
@@ -106,6 +127,9 @@ async function handleAddComment(event) {
   }
 }
 
+/**
+ * Create an article for each comment
+ */
 function createCommentArticle(comment) {
   const article = document.createElement("article");
 
