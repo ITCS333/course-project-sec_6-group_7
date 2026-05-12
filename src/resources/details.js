@@ -44,7 +44,7 @@ async function handleAddComment(event) {
     },
     body: JSON.stringify({
       resource_id: resourceId,
-      author: "Student", // Hardcoded author for simplicity
+      author: "Student", // Hardcoded for now
       text: commentText,
     }),
   });
