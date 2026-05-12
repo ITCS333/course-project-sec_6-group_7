@@ -21,7 +21,7 @@ async function handleAddComment(event) {
 
   const data = await response.json();
   if (data.success) {
-    // Create and render the new comment directly
+    // Create and append the new comment
     const commentArticle = createCommentArticle(data.comment);
     document.getElementById("comment-list").appendChild(commentArticle);
     document.getElementById("new-comment").value = ""; // Clear the comment box
@@ -31,7 +31,7 @@ async function handleAddComment(event) {
 }
 
 /**
- * Create a comment article element (needed here too for handleAddComment)
+ * Create a comment article element
  */
 function createCommentArticle(comment) {
   const article = document.createElement("article");
@@ -41,7 +41,7 @@ function createCommentArticle(comment) {
   article.appendChild(commentText);
   
   const footer = document.createElement("footer");
-  footer.textContent = `Posted by: ${comment.author}`;
+  footer.textContent = "Posted by: " + comment.author;
   article.appendChild(footer);
   
   return article;
