@@ -1,5 +1,5 @@
 
-var resources = [];
+let resources = [];
 
 const resourceForm = document.getElementById("resource-form");
 
@@ -42,10 +42,10 @@ function createResourceRow(resource) {
   return tr;
 }
 
-function renderTable() {
+function renderTable(data = resources) {
   resourcesTbody.innerHTML = "";
 
-  resources.forEach(resource => {
+  data.forEach(resource => {
     const row = createResourceRow(resource);
     resourcesTbody.appendChild(row);
   });
