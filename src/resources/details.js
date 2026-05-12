@@ -1,214 +1,91 @@
-/*
-  Requirement: Populate the resource detail page and discussion forum.
+document.addEventListener("DOMContentLoaded", function () {
+    const resourceId = new URLSearchParams(window.location.search).get("id");
+    const resourceTitle = document.getElementById("resource-title");
+    const resourceDescription = document.getElementById("resource-description");
+    const resourceLink = document.getElementById("resource-link");
+    const commentList = document.getElementById("comment-list");
+    const commentForm = document.getElementById("comment-form");
+    const newCommentText = document.getElementById("new-comment");
 
-  Instructions:
-  1. Link this file to `details.html` using:
-     <script src="details.js" defer></script>
+    async function loadResourceDetails() {
+        try {
+            const response = await fetch(`./api/index.php?id=${resourceId}`);
+            const data = await response.json();
 
-  2. In `details.html`, add the following IDs:
-     - To the <h1>:                           id="resource-title"
-     - To the description <p>:                id="resource-description"
-     - To the "Access Resource Material" <a>: id="resource-link"
-     - To the <div> for comments:             id="comment-list"
-     - To the comment <form>:                 id="comment-form"
-     - To the <textarea>:                     id="new-comment"
-
-  3. Implement the TODOs below.
-*/
-
-// --- Global Data Store ---
-// These will hold the data related to this specific resource.
-let currentResourceId = null;
-let currentComments = [];
-
-// --- Element Selections ---
-// TODO: Select all the elements you added IDs for in step 2.
-const resourceTitleElement = document.getElementById('resource-title');
-const resourceDescriptionElement = document.getElementById('resource-description');
-const resourceLinkElement = document.getElementById('resource-link');
-const commentListElement = document.getElementById('comment-list');
-const commentFormElement = document.getElementById('comment-form');
-const newCommentElement = document.getElementById('new-comment');
-// --- Functions ---
-
-/**
- * TODO: Implement the getResourceIdFromURL function.
- * It should:
- * 1. Get the query string from `window.location.search`.
- * 2. Use the `URLSearchParams` object to get the value of the 'id' parameter.
- * 3. Return the id value (as a string).
- */
-function getResourceIdFromURL() {
- const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('id');}
-
-/**
- * TODO: Implement the renderResourceDetails function.
- * It takes one resource object { id, title, description, link }.
- * It should:
- * 1. Set the `textContent` of the title element (id="resource-title")
- *    to the resource's title.
- * 2. Set the `textContent` of the description element (id="resource-description")
- *    to the resource's description.
- * 3. Set the `href` attribute of the link element (id="resource-link")
- *    to the resource's link.
- */
-function renderResourceDetails(resource) {
-resourceTitleElement.textContent = resource.title;
-  resourceDescriptionElement.textContent = resource.description;
-  resourceLinkElement.href = resource.link;
-}
-
-/**
- * TODO: Implement the createCommentArticle function.
- * It takes one comment object { id, resource_id, author, text, created_at }.
- * It should return an <article> element matching the structure in `details.html`:
- * - A <p> containing the comment's text.
- * - A <footer> containing the comment's author
- *   (e.g., "Posted by: Ali Hassan").
- */
-function createCommentArticle(comment) {
-  const commentArticle = document.createElement('article');
-  const commentText = document.createElement('p');
-  commentText.textContent = comment.text;
-  const commentFooter = document.createElement('footer');
-  commentFooter.textContent = `Posted by: ${comment.author}`;
-
-  commentArticle.appendChild(commentText);
-  commentArticle.appendChild(commentFooter);
-
-  return commentArticle;}
-
-/**
- * TODO: Implement the renderComments function.
- * It should:
- * 1. Clear the comment list container (id="comment-list").
- * 2. Loop through the global `currentComments` array.
- * 3. For each comment, call `createCommentArticle()` and
- *    append the returned <article> to the comment list container.
- */
-function renderComments() {
-  // Clear the existing comments
-  commentListElement.innerHTML = '';
-
-  // Loop through the currentComments array and add each comment
-  currentComments.forEach(comment => {
-    const commentArticle = createCommentArticle(comment);
-    commentListElement.appendChild(commentArticle);
-  });
-}
-
-/**
- * TODO: Implement the handleAddComment function.
- * This is the event handler for the comment form's 'submit' event.
- * It should:
- * 1. Prevent the form's default submission.
- * 2. Get the text from the textarea (id="new-comment").
- * 3. If the text is empty, return early.
- * 4. Use `fetch()` to POST the new comment to the API:
- *    - URL: './api/index.php?action=comment'
- *    - Method: POST
- *    - Headers: { 'Content-Type': 'application/json' }
- *    - Body: JSON.stringify({
- *        resource_id: currentResourceId,
- *        author: 'Student',
- *        text: commentText
- *      })
- *      ('Student' is an acceptable hardcoded author for this exercise.)
- * 5. On success, add the new comment object returned by the API to the
- *    global `currentComments` array.
- * 6. Call `renderComments()` to refresh the comment list.
- * 7. Clear the textarea.
- */
-function handleAddComment(event) {
-  event.preventDefault();
-
-  // Get comment text
-  const commentText = newCommentElement.value.trim();
-  if (commentText === '') return;
-
-  // Send the new comment to the API
-  fetch('./api/index.php?action=comment', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      resource_id: currentResourceId,
-      author: 'Student', // Hardcoded author for this example
-      text: commentText,
-    }),
-  })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        // Add the new comment to the currentComments array
-        currentComments.push(data.comment);
-
-        // Refresh the comment list
-        renderComments();
-
-        // Clear the textarea
-        newCommentElement.value = '';
-      }
-    })
-    .catch(error => console.error('Error adding comment:', error));}
-
-/**
- * TODO: Implement the initializePage function.
- * This function must be 'async'.
- * It should:
- * 1. Call `getResourceIdFromURL()` and store the result in `currentResourceId`.
- * 2. If no id is found, set the title element's textContent to
- *    "Resource not found." and stop.
- * 3. Fetch the resource details and its comments at the same time
- *    using Promise.all():
- *    - Resource URL:  `./api/index.php?id=${currentResourceId}`
- *      Response:      { success: true, data: { id, title, description, link, created_at } }
- *    - Comments URL:  `./api/index.php?resource_id=${currentResourceId}&action=comments`
- *      Response:      { success: true, data: [ ...comment objects ] }
- * 4. Store the comments array in the global `currentComments` variable.
- *    (If no comments exist, use an empty array.)
- * 5. If the resource is found:
- *    - Call `renderResourceDetails()` with the resource object.
- *    - Call `renderComments()` to display the initial comments.
- *    - Add the 'submit' event listener to the comment form
- *      (id="comment-form"), calling `handleAddComment`.
- * 6. If the resource is not found, display an error in the title element.
- */
-async function initializePage() {
-  currentResourceId = getResourceIdFromURL();
-
-  if (!currentResourceId) {
-    resourceTitleElement.textContent = 'Resource not found.';
-    return;
-  }
-
-  try {
-    const [resourceResponse, commentsResponse] = await Promise.all([
-      fetch(`./api/index.php?id=${currentResourceId}`),
-      fetch(`./api/index.php?resource_id=${currentResourceId}&action=comments`),
-    ]);
-
-    const resourceData = await resourceResponse.json();
-    const commentsData = await commentsResponse.json();
-
-    if (resourceData.success && commentsData.success) {
-      const resource = resourceData.data;
-      currentComments = commentsData.data || [];
-
-      // Render the resource details and comments
-      renderResourceDetails(resource);
-      renderComments();
-
-      // Add event listener for comment form
-      commentFormElement.addEventListener('submit', handleAddComment);
-    } else {
-      resourceTitleElement.textContent = 'Resource not found.';
+            if (data.success) {
+                const resource = data.data;
+                resourceTitle.textContent = resource.title;
+                resourceDescription.textContent = resource.description;
+                resourceLink.href = resource.link;
+                resourceLink.textContent = "Access Resource Material";
+                loadComments(resource.id);
+            } else {
+                console.error("Failed to load resource details");
+            }
+        } catch (error) {
+            console.error("Error fetching resource details:", error);
+        }
     }
-  } catch (error) {
-    console.error('Error initializing page:', error);
-  }}
 
-// --- Initial Page Load ---
-initializePage();
+    async function loadComments(resourceId) {
+        try {
+            const response = await fetch(`./api/index.php?resource_id=${resourceId}&action=comments`);
+            const data = await response.json();
+
+            if (data.success) {
+                commentList.innerHTML = "";  // Clear existing comments
+                data.data.forEach((comment) => {
+                    const commentArticle = document.createElement("article");
+
+                    const commentText = document.createElement("p");
+                    commentText.textContent = comment.text;
+                    commentArticle.appendChild(commentText);
+
+                    const footer = document.createElement("footer");
+                    footer.textContent = `Posted by: ${comment.author}`;
+                    commentArticle.appendChild(footer);
+
+                    commentList.appendChild(commentArticle);
+                });
+            }
+        } catch (error) {
+            console.error("Error fetching comments:", error);
+        }
+    }
+
+    async function handleCommentSubmit(event) {
+        event.preventDefault();
+
+        const commentText = newCommentText.value.trim();
+        if (!commentText) return;
+
+        try {
+            const response = await fetch("./api/index.php?action=comment", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    resource_id: resourceId,
+                    author: "Student",
+                    text: commentText,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                loadComments(resourceId);  // Reload comments
+                newCommentText.value = "";  // Clear textarea
+            } else {
+                console.error("Failed to post comment");
+            }
+        } catch (error) {
+            console.error("Error posting comment:", error);
+        }
+    }
+
+    commentForm.addEventListener("submit", handleCommentSubmit);
+
+    loadResourceDetails();
+});
