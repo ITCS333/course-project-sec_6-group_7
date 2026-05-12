@@ -29,48 +29,6 @@ function renderComments(comments) {
 }
 
 /**
- * Render resource details on the page
- */
-function renderResourceDetails(resource) {
-  document.getElementById("resource-title").textContent = resource.title;
-  document.getElementById("resource-description").textContent = resource.description;
-  document.getElementById("resource-link").href = resource.link;
-}
-
-/**
- * Fetch the resource ID from the URL query string
- */
-function getResourceIdFromURL() {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get("id");
-}
-
-/**
- * Initialize the page (load resource details and comments)
- */
-async function initializePage() {
-  const resourceId = getResourceIdFromURL();
-  if (!resourceId) {
-    console.error("Resource ID not found in the URL.");
-    return;
-  }
-
-  // Load resource details
-  const resourceResponse = await fetch(`./api/index.php?id=${resourceId}`);
-  const resourceData = await resourceResponse.json();
-  if (resourceData.success) {
-    renderResourceDetails(resourceData.data);
-  }
-
-  // Load comments
-  const commentsResponse = await fetch(`./api/index.php?resource_id=${resourceId}&action=comments`);
-  const commentsData = await commentsResponse.json();
-  if (commentsData.success) {
-    renderComments(commentsData.data);
-  }
-}
-
-/**
  * Handle the form submission for adding a new comment
  */
 async function handleAddComment(event) {
@@ -99,14 +57,3 @@ async function handleAddComment(event) {
     console.error("Failed to add comment");
   }
 }
-
-/**
- * Attach event listeners on DOM ready
- */
-document.addEventListener("DOMContentLoaded", () => {
-  initializePage();
-  const form = document.getElementById("comment-form");
-  if (form) {
-    form.addEventListener("submit", handleAddComment);
-  }
-});
