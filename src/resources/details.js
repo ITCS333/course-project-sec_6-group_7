@@ -52,7 +52,7 @@ async function handleAddComment(event) {
   const data = await response.json();
   if (data.success) {
     renderComments([data.comment]);
-    document.getElementById("new-comment").value = ""; // Clear the comment box
+    document.getElementById("new-comment").value = ""; // Clear the comment box after posting
   } else {
     console.error("Failed to add comment");
   }
