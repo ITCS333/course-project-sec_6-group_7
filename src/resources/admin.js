@@ -60,10 +60,10 @@ function createResourceRow(resource) {
  */
 function renderTable() {
   resourcesTbody.innerHTML = '';  // Clear existing content
-  resources.forEach(resource => {
+  resources.forEach(function(resource) {
     const row = createResourceRow(resource);
     resourcesTbody.appendChild(row);
-  });  // Fixed: Added missing closing parenthesis
+  });
 }
 
 /**
@@ -102,12 +102,12 @@ async function handleAddResource(event) {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ title, description, link }),
+    body: JSON.stringify({ title: title, description: description, link: link }),
   });
 
   const data = await response.json();
   if (data.success) {
-    resources.push({ id: data.id, title, description, link });
+    resources.push({ id: data.id, title: title, description: description, link: link });
     renderTable();
     resourceForm.reset();
   } else {
@@ -128,7 +128,7 @@ async function handleTableClick(event) {
   }
 
   if (button.classList.contains('edit-btn')) {
-    const resource = resources.find(r => r.id == id);
+    const resource = resources.find(function(r) { return r.id == id; });
     document.getElementById('resource-title').value = resource.title;
     document.getElementById('resource-description').value = resource.description;
     document.getElementById('resource-link').value = resource.link;
@@ -137,7 +137,7 @@ async function handleTableClick(event) {
     submitButton.textContent = 'Update Resource';
 
     resourceForm.removeEventListener('submit', handleAddResource);
-    resourceForm.addEventListener('submit', (e) => handleEditResource(e, resource));
+    resourceForm.addEventListener('submit', function(e) { handleEditResource(e, resource); });
   }
 }
 
@@ -146,11 +146,11 @@ async function handleTableClick(event) {
  * It will send a DELETE request to the API and remove the resource from the resources array.
  */
 async function handleDeleteResource(id) {
-  const response = await fetch(`./api/index.php?id=${id}`, { method: 'DELETE' });
+  const response = await fetch('./api/index.php?id=' + id, { method: 'DELETE' });
 
   const data = await response.json();
   if (data.success) {
-    resources = resources.filter(resource => resource.id !== parseInt(id));  // Remove deleted resource
+    resources = resources.filter(function(resource) { return resource.id != id; });
     renderTable();
   } else {
     console.error('Failed to delete resource');
@@ -173,18 +173,18 @@ async function handleEditResource(event, resource) {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ id: resource.id, title, description, link }),
+    body: JSON.stringify({ id: resource.id, title: title, description: description, link: link }),
   });
 
   const data = await response.json();
   if (data.success) {
-    const updatedResource = { id: resource.id, title, description, link };
-    resources = resources.map(r => (r.id == resource.id ? updatedResource : r));
+    const updatedResource = { id: resource.id, title: title, description: description, link: link };
+    resources = resources.map(function(r) { return r.id == resource.id ? updatedResource : r; });
     renderTable();
     resourceForm.reset();
     const submitButton = document.getElementById('add-resource');
     submitButton.textContent = 'Add Resource';
-    resourceForm.removeEventListener('submit', handleEditResource);
+    resourceForm.removeEventListener('submit', function(e) { handleEditResource(e, resource); });
     resourceForm.addEventListener('submit', handleAddResource);
   } else {
     console.error('Failed to update resource');
@@ -192,7 +192,7 @@ async function handleEditResource(event, resource) {
 }
 
 /**
- * Load and initialize the page
+ * Load and initialize the admin page
  */
 function loadAndInitialize() {
   loadResources();
