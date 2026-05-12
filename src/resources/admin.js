@@ -21,25 +21,21 @@ const resourcesTbody = document.getElementById('resources-tbody');
 function createResourceRow(resource) {
   const row = document.createElement('tr');
 
-  // Title cell
   const titleCell = document.createElement('td');
   titleCell.textContent = resource.title;
   row.appendChild(titleCell);
 
-  // Description cell
   const descriptionCell = document.createElement('td');
   descriptionCell.textContent = resource.description;
   row.appendChild(descriptionCell);
 
-  // Link cell
   const linkCell = document.createElement('td');
   const link = document.createElement('a');
-  link.href = resource.link; // Ensure the link is being set correctly
+  link.href = resource.link;
   link.textContent = 'Visit';
   linkCell.appendChild(link);
   row.appendChild(linkCell);
 
-  // Actions cell with Edit and Delete buttons
   const actionsCell = document.createElement('td');
   const editButton = document.createElement('button');
   editButton.textContent = 'Edit';
@@ -71,7 +67,7 @@ function renderTable() {
 }
 
 /**
- * Fetch resources from the API and populate the table.
+ * Fetch resources from the API and populate the table
  * This function is called when the page loads.
  */
 async function loadResources() {
@@ -101,7 +97,6 @@ async function handleAddResource(event) {
   const description = document.getElementById('resource-description').value;
   const link = document.getElementById('resource-link').value;
 
-  // Send the new resource data to the API
   const response = await fetch('./api/index.php', {
     method: 'POST',
     headers: {
@@ -112,9 +107,9 @@ async function handleAddResource(event) {
 
   const data = await response.json();
   if (data.success) {
-    resources.push(data.resource);  // Add new resource to the array
-    renderTable();  // Re-render table
-    resourceForm.reset();  // Reset the form
+    resources.push({ id: data.id, title, description, link });
+    renderTable();
+    resourceForm.reset();
   } else {
     console.error('Failed to add resource');
   }
@@ -129,26 +124,20 @@ async function handleTableClick(event) {
   const id = button.getAttribute('data-id');
 
   if (button.classList.contains('delete-btn')) {
-    // Handle delete resource
     await handleDeleteResource(id);
   }
 
   if (button.classList.contains('edit-btn')) {
-    // Handle edit resource
     const resource = resources.find(r => r.id === id);
-    if (resource) {
-      document.getElementById('new-resource-title').value = resource.title;
-      document.getElementById('resource-description').value = resource.description;
-      document.getElementById('resource-link').value = resource.link;
+    document.getElementById('new-resource-title').value = resource.title;
+    document.getElementById('resource-description').value = resource.description;
+    document.getElementById('resource-link').value = resource.link;
 
-      // Change submit button text to "Update Resource"
-      const submitButton = document.getElementById('add-resource-btn');
-      submitButton.textContent = 'Update Resource';
+    const submitButton = document.getElementById('add-resource-btn');
+    submitButton.textContent = 'Update Resource';
 
-      // Change the form submit behavior to update resource
-      resourceForm.removeEventListener('submit', handleAddResource);
-      resourceForm.addEventListener('submit', (e) => handleEditResource(e, resource));
-    }
+    resourceForm.removeEventListener('submit', handleAddResource);
+    resourceForm.addEventListener('submit', (e) => handleEditResource(e, resource));
   }
 }
 
@@ -162,7 +151,7 @@ async function handleDeleteResource(id) {
   const data = await response.json();
   if (data.success) {
     resources = resources.filter(resource => resource.id !== parseInt(id));  // Remove deleted resource
-    renderTable();  // Re-render table
+    renderTable();
   } else {
     console.error('Failed to delete resource');
   }
@@ -179,7 +168,6 @@ async function handleEditResource(event, resource) {
   const description = document.getElementById('resource-description').value;
   const link = document.getElementById('resource-link').value;
 
-  // Send updated resource data to the API
   const response = await fetch('./api/index.php', {
     method: 'PUT',
     headers: {
@@ -191,25 +179,21 @@ async function handleEditResource(event, resource) {
   const data = await response.json();
   if (data.success) {
     const updatedResource = { id: resource.id, title, description, link };
-    resources = resources.map(r => (r.id === resource.id ? updatedResource : r));  // Update resource in array
-    renderTable();  // Re-render table
-    resourceForm.reset();  // Reset the form
+    resources = resources.map(r => (r.id === resource.id ? updatedResource : r));
+    renderTable();
+    resourceForm.reset();
     const submitButton = document.getElementById('add-resource-btn');
-    submitButton.textContent = 'Add Resource';  // Reset button text
+    submitButton.textContent = 'Add Resource';
     resourceForm.removeEventListener('submit', handleEditResource);
-    resourceForm.addEventListener('submit', handleAddResource);  // Reset form submit behavior
+    resourceForm.addEventListener('submit', handleAddResource);
   } else {
     console.error('Failed to update resource');
   }
 }
 
 // --- Initial Page Load ---
-// Call the function to load resources and populate the table
 loadResources();
 
 // --- Event Listeners ---
-// Add event listener for table actions (edit, delete)
-resourcesTbody.addEventListener('click', handleTableClick);
-
-// Add event listener for the form submit (add resource)
 resourceForm.addEventListener('submit', handleAddResource);
+resourcesTbody.addEventListener('click', handleTableClick);
