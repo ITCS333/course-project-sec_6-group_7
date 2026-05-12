@@ -53,71 +53,8 @@ function getResourceIdFromURL() {
 }
 
 /**
- * Create a comment article element
- */
-function createCommentArticle(comment) {
-  const article = document.createElement("article");
-  
-  const commentText = document.createElement("p");
-  commentText.textContent = comment.text;
-  article.appendChild(commentText);
-  
-  const footer = document.createElement("footer");
-  footer.textContent = "Posted by: " + comment.author;
-  article.appendChild(footer);
-  
-  return article;
-}
-
-/**
- * Initialize the page (load resource details and comments)
- */
-async function initializePage() {
-  const resourceId = getResourceIdFromURL();
-  if (!resourceId) {
-    console.error("Resource ID not found in the URL.");
-    return;
-  }
-
-  // Load resource details and comments
-  const resourceResponse = await fetch("./api/index.php?id=" + resourceId);
-  const resourceData = await resourceResponse.json();
-  if (resourceData.success) {
-    renderResourceDetails(resourceData.data);
-  }
-
-  const commentsResponse = await fetch("./api/index.php?resource_id=" + resourceId + "&action=comments");
-  const commentsData = await commentsResponse.json();
-  if (commentsData.success) {
-    renderComments(commentsData.data);
-  }
-}
-
-/**
- * Render resource details on the page
- */
-function renderResourceDetails(resource) {
-  document.getElementById("resource-title").textContent = resource.title;
-  document.getElementById("resource-description").textContent = resource.description;
-  document.getElementById("resource-link").href = resource.link;
-}
-
-/**
- * Render comments for a resource
- */
-function renderComments(comments) {
-  const commentList = document.getElementById("comment-list");
-  commentList.innerHTML = ""; // Clear existing comments
-
-  comments.forEach((comment) => {
-    const commentArticle = createCommentArticle(comment);
-    commentList.appendChild(commentArticle);
-  });
-}
-
-/**
  * Initialize the page when the DOM is ready
  */
 document.addEventListener("DOMContentLoaded", () => {
-  initializePage();
+  loadResources();
 });
