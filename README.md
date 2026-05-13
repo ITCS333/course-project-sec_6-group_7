@@ -25,7 +25,7 @@ The website covers five functional areas, each assigned to one team member.
 | 2 | Course Resources |202305773|Mariam-Ebrahim-Albastki|
 | 3 | Weekly Breakdown |202310605|Mrym-35|
 | 4 | Assignments |202303420|jasmine-shebl|
-| 5 | Discussion Board |202305736| |
+| 5 | Discussion Board |202305736|M6629|
 
 ---
 
