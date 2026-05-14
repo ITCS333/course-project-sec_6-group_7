@@ -67,8 +67,7 @@ function handleLogin(event) {
     return;
 
   }
-
-
+  if (typeof fetch === "undefined") return;
   // Login request
   fetch("./api/index.php", {
 

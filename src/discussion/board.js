@@ -9,21 +9,20 @@ const newTopicForm = document.getElementById('new-topic-form');
 const topicListContainer = document.getElementById('topic-list-container');
 const discussionNav = document.getElementById('discussion-nav');
 
-if (localStorage.getItem('is_admin') === '1') {
-
-  discussionNav.innerHTML = `
-    <a href="../admin/manage_users.html">← Back</a>
-  `;
-
-} else {
-
-  discussionNav.innerHTML = `
-    <a href="../resources/list.html">Resources</a> |
-    <a href="../weekly/list.html">Weekly</a> |
-    <a href="../assignments/list.html">Assignments</a> |
-    <a href="../discussion/board.html">Discussion</a> |
-    <a href="../../index.html">Logout</a>
-  `;
+if (discussionNav) {
+  if (typeof localStorage !== "undefined" && localStorage.getItem("is_admin") === "1") {
+    discussionNav.innerHTML = `
+      <a href="../admin/manage_users.html">← Back</a>
+    `;
+  } else {
+    discussionNav.innerHTML = `
+      <a href="../resources/list.html">Resources</a> |
+      <a href="../weekly/list.html">Weekly</a> |
+      <a href="../assignments/list.html">Assignments</a> |
+      <a href="../discussion/board.html">Discussion</a> |
+      <a href="../../index.html">Logout</a>
+    `;
+  }
 }
 // --- Functions ---
 

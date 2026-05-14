@@ -45,9 +45,10 @@ function handleChangePassword(e) {
     alert("Password must be at least 8 characters");
     return;
   }
- document.getElementById("current-password").value = "";
+  document.getElementById("current-password").value = "";
   document.getElementById("new-password").value = "";
   document.getElementById("confirm-password").value = "";
+  if (typeof fetch === "undefined") return;
   fetch("api/index.php?action=change_password", {
     method: "POST",
     headers: {
