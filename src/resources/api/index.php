@@ -352,19 +352,27 @@ function createComment($db, $data) {
 
     if ($stmt->rowCount() > 0) {
 
-        sendResponse([
-            'success' => true,
-            'message' => 'Comment created successfully.',
-            'id' => $db->lastInsertId()
-        ], 201);
+    $newComment = [
+        'id' => $db->lastInsertId(),
+        'resource_id' => $data['resource_id'],
+        'author' => $author,
+        'text' => $text
+    ];
 
-    } else {
+    sendResponse([
+        'success' => true,
+        'message' => 'Comment created successfully.',
+        'id' => $db->lastInsertId(),
+        'data' => $newComment
+    ], 201);
 
-        sendResponse([
-            'success' => false,
-            'message' => 'Failed to create comment.'
-        ], 500);
-    }
+} else {
+
+    sendResponse([
+        'success' => false,
+        'message' => 'Failed to create comment.'
+    ], 500);
+}
 }
 
 function deleteComment($db, $commentId) {
@@ -529,4 +537,4 @@ function validateRequiredFields($data, $requiredFields) {
         'missing' => $missing
     ];
 }
-?>y 
+?>

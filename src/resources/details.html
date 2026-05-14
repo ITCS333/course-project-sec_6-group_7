@@ -1,18 +1,19 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resource Details</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../common/styles.css">
     <script src="details.js" defer></script>
 </head>
 <body>
 
-    <header>
+    <header style="display:flex; justify-content:space-between; align-items:center;">
         <h1 id="resource-title">Resource Details</h1>
+        <nav>
+    <a href="list.html">← Back</a>
+  </nav>
     </header>
 
     <main>
@@ -24,9 +25,7 @@
         <section id="discussion-forum">
             <h2>Discussion</h2>
 
-            <div id="comment-list">
-                <!-- Comments will be injected here dynamically by details.js -->
-            </div>
+            <div id="comment-list">            </div>
 
             <form id="comment-form">
                 <fieldset>

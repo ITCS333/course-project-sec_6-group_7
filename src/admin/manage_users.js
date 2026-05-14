@@ -1,14 +1,11 @@
-// --- Global Data Store ---
 let users = [];
 
-// --- Element Selections ---
 const userTableBody = document.getElementById("user-table-body");
 const addUserForm = document.getElementById("add-user-form");
 const changePasswordForm = document.getElementById("password-form");
 const searchInput = document.getElementById("search-input");
 const tableHeaders = document.querySelectorAll("#user-table thead th");
 
-// --- Functions ---
 
 function createUserRow(user) {
   const tr = document.createElement("tr");
@@ -31,7 +28,6 @@ function renderTable(userArray) {
   userArray.forEach(u => userTableBody.appendChild(createUserRow(u)));
 }
 
-// ---------------- PASSWORD ----------------
 
 function handleChangePassword(e) {
   e.preventDefault();
@@ -49,13 +45,38 @@ function handleChangePassword(e) {
     alert("Password must be at least 8 characters");
     return;
   }
-
-  document.getElementById("current-password").value = "";
+ document.getElementById("current-password").value = "";
   document.getElementById("new-password").value = "";
   document.getElementById("confirm-password").value = "";
+  fetch("api/index.php?action=change_password", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      id: localStorage.getItem("user_id"),
+      current_password: current,
+      new_password: newPass
+    })
+  })
+  .then(async response => {
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message);
+  }
+
+  alert(result.data);
+
+})
+  .catch(error => {
+
+    alert(error.message);
+
+  });
 }
 
-// ---------------- ADD USER ----------------
 
 function handleAddUser(e) {
   e.preventDefault();
@@ -70,15 +91,17 @@ function handleAddUser(e) {
     return;
   }
 
-  fetch("api/index.php", {
-    method: "POST",
-    body: JSON.stringify({ name, email, password, is_admin })
-  });
+fetch("api/index.php", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ name, email, password, is_admin })
+});
 
   addUserForm.reset();
 }
 
-// ---------------- DELETE ----------------
 
 function handleTableClick(e) {
   if (e.target.classList.contains("delete-btn")) {
@@ -86,16 +109,24 @@ function handleTableClick(e) {
 
     if (!confirm("Are you sure?")) return;
 
-    fetch(`api/index.php?id=${id}`, {
-      method: "DELETE"
-    });
+fetch(`api/index.php?id=${id}`, {
+  method: "DELETE"
+})
+.then(() => {
+  users = users.filter(u => u.id != id);
+  renderTable(users);
+});
   }
 }
 
-// ---------------- SEARCH ----------------
 
 function handleSearch(e) {
   const term = e.target.value.toLowerCase();
+
+  if (!term) {
+    renderTable(users);
+    return;
+  }
 
   const filtered = users.filter(u =>
     u.name.toLowerCase().includes(term) ||
@@ -104,8 +135,6 @@ function handleSearch(e) {
 
   renderTable(filtered);
 }
-
-// ---------------- SORT ----------------
 
 function handleSort(e) {
   const th = e.currentTarget;
@@ -128,10 +157,7 @@ function handleSort(e) {
   renderTable(users);
 }
 
-// ---------------- LOAD ----------------
-
 async function loadUsersAndInitialize() {
-  if (loadUsersAndInitialize._listenersAttached) return;
 
   const res = await fetch("api/index.php");
   const data = await res.json();
@@ -141,15 +167,15 @@ async function loadUsersAndInitialize() {
     renderTable(users);
   }
 
-  changePasswordForm.addEventListener("submit", handleChangePassword);
-  addUserForm.addEventListener("submit", handleAddUser);
-  userTableBody.addEventListener("click", handleTableClick);
-  searchInput.addEventListener("input", handleSearch);
+  if (!loadUsersAndInitialize._listenersAttached) {
+    changePasswordForm.addEventListener("submit", handleChangePassword);
+    addUserForm.addEventListener("submit", handleAddUser);
+    userTableBody.addEventListener("click", handleTableClick);
+    searchInput.addEventListener("input", handleSearch);
 
-  tableHeaders.forEach(th => th.addEventListener("click", handleSort));
+    tableHeaders.forEach(th => th.addEventListener("click", handleSort));
 
-  loadUsersAndInitialize._listenersAttached = true;
+    loadUsersAndInitialize._listenersAttached = true;
+  }
 }
-
-// --- Initial Page Load ---
 loadUsersAndInitialize();

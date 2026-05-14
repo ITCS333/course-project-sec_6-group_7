@@ -1,31 +1,4 @@
-/*
-  Requirement: Make the "Discussion Board" page interactive.
 
-  Instructions:
-  1. This file is already linked to `board.html` via:
-         <script src="board.js" defer></script>
-
-  2. In `board.html`:
-     - The new-topic form has id="new-topic-form".
-     - The topic list container has id="topic-list-container".
-
-  3. Implement the TODOs below.
-
-  API base URL: ./api/index.php
-  All requests and responses use JSON.
-  Successful list response shape: { success: true, data: [ ...topic objects ] }
-  Each topic object shape (from the topics table):
-    {
-      id:         number,   // integer primary key from the topics table
-      subject:    string,
-      message:    string,
-      author:     string,
-      created_at: string    // "YYYY-MM-DD HH:MM:SS" — matches the SQL column name
-    }
-*/
-
-// --- Global Data Store ---
-// Holds the topics currently displayed in the list.
 let topics = [];
 
 // --- Element Selections ---
@@ -34,7 +7,24 @@ const newTopicForm = document.getElementById('new-topic-form');
 
 // TODO: Select the topic list container by id 'topic-list-container'.
 const topicListContainer = document.getElementById('topic-list-container');
+const discussionNav = document.getElementById('discussion-nav');
 
+if (localStorage.getItem('is_admin') === '1') {
+
+  discussionNav.innerHTML = `
+    <a href="../admin/manage_users.html">← Back</a>
+  `;
+
+} else {
+
+  discussionNav.innerHTML = `
+    <a href="../resources/list.html">Resources</a> |
+    <a href="../weekly/list.html">Weekly</a> |
+    <a href="../assignments/list.html">Assignments</a> |
+    <a href="../discussion/board.html">Discussion</a> |
+    <a href="../../index.html">Logout</a>
+  `;
+}
 // --- Functions ---
 
 /**

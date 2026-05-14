@@ -1,1 +1,230 @@
-/* CSS Styles */
+body{
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+header{
+    margin-bottom: 30px;
+}
+
+form{
+    margin-bottom: 30px;
+}
+
+input,
+textarea{
+    padding: 8px;
+    margin: 5px;
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+textarea#resource-description{
+    width: 250px;
+    height: 20px;
+    resize: none;
+}
+
+p#resource-description{
+    width: auto;
+    height: auto;
+}
+
+table{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+table td{
+    border: 1px solid #ccc;
+    padding: 12px;
+    text-align: left;
+    vertical-align: top;
+}
+
+th{
+    background-color: #f2f2f2;
+}
+
+button{
+    padding: 6px 10px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+a{
+    color: blue;
+}
+.edit-btn,
+.delete-btn{
+    display: inline-block;
+    margin: 2px;
+}
+td:last-child{
+    white-space: nowrap;
+}
+td a{
+    word-break: break-word;
+}
+td{
+    max-width: 300px;
+}
+#week-description,
+#week-links{
+    height: 22px;
+    resize: none;
+}
+textarea#assignment-description,
+textarea#assignment-files{
+    width: 180px;
+    height: 22px;
+    resize: none;
+}
+
+p#assignment-description{
+    width: auto;
+    height: auto;
+}
+fieldset{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#new-topic-form input{
+    width: 220px;
+}
+
+#topics-container article,
+#topic-list-container article{
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.topic-actions{
+    margin-top: 10px;
+}
+
+.topic-actions a,
+.topic-actions button{
+    margin-right: 8px;
+}
+
+#new-topic-form fieldset{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+#original-post{
+    margin-bottom: 30px;
+}
+
+#reply-list-container article{
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    background-color: #fafafa;
+}
+
+#reply-list-container footer{
+    margin-top: 10px;
+    color: #555;
+    font-size: 14px;
+}
+
+.delete-reply-btn{
+    margin-top: 10px;
+}
+
+#reply-form textarea{
+    width: 220px;
+    height: 50px;
+}
+
+#reply-form fieldset{
+    padding: 15px;
+}
+
+#reply-form button{
+    padding: 6px 12px;
+}
+#new-topic-message{
+    width: 260px !important;
+    height: 40px !important;
+    resize: none;
+}
+#discussion-forum{
+    margin-top: 40px;
+}
+
+#comment-form{
+    margin-top: 25px;
+}
+
+#comment-form fieldset{
+    padding: 20px;
+    display: block;
+}
+
+#comment-form label{
+    display: block;
+    margin-bottom: 8px;
+}
+
+#new-comment{
+    width: 260px;
+    height: 60px;
+    resize: none;
+    display: block;
+    margin-bottom: 12px;
+}
+
+#comment-form button{
+    padding: 6px 12px;
+}
+
+#comment-list article{
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    background-color: #fafafa;
+}
+
+#comment-list footer{
+    margin-top: 10px;
+    color: #555;
+    font-size: 14px;
+}
+#week-list-section article{
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+}
+#week-list-section h2{
+    margin-top: 0;
+}
+#assignment-list-section article{
+    border: 1px solid #ccc;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+}
+#resource-list-section article,
+.resource-card{
+    border: 1px solid #ddd;
+    padding: 25px;
+    margin-bottom: 25px;
+    border-radius: 6px;
+    background-color: #fafafa;
+}

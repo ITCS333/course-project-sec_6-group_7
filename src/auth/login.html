@@ -1,57 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- TODO: Add the 'meta' tag to specify the character encoding for the document to be UTF-8. -->
+
     <meta charset="UTF-8">
 
-    <!-- TODO: Add the 'meta' tag that makes the page responsive. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- TODO: Add a 'title' for the page. -->
     <title>Login</title>
 
-    <!-- TODO: Link to a CSS framework -->
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
+
 </head>
 
-<body style="display:flex; justify-content:center; align-items:center; height:100vh;">
+<body style="
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+">
 
-    <!-- TODO: Use the 'main' element -->
     <main>
 
-        <!-- TODO: Create a 'section' element -->
-        <section style="width:300px;">
+        <section style="
+            width:350px;
+            border:1px solid #ccc;
+            padding:30px;
+            border-radius:10px;
+        ">
 
-            <!-- TODO: Add heading -->
-            <h2>Welcome Back!</h2>
+            <h1 style="text-align:center;">
+                ITCS333 Learning Portal
+            </h1>
 
-            <!-- TODO: Create form -->
             <form id="login-form" action="#">
 
-                <!-- TODO: fieldset -->
                 <fieldset>
 
-                    <!-- TODO: legend -->
                     <legend>Secure Login</legend>
 
-                    <!-- TODO: email label -->
-                    <label for="email">Email Address</label>
+                    <label for="email">
+                        Email Address
+                    </label>
 
-                    <!-- TODO: email input -->
-                    <input type="email" id="email" required>
+                    <input
+                        type="email"
+                        id="email"
+                        required
+                    >
 
-                    <!-- TODO: password label -->
-                    <label for="password">Password</label>
+                    <label for="password">
+                        Password
+                    </label>
 
-                    <!-- TODO: password input -->
-                    <input type="password" id="password" required minlength="8">
+                    <input
+                        type="password"
+                        id="password"
+                        minlength="8"
+                        required
+                    >
 
-                    <!-- TODO: submit button -->
-                    <button type="submit" id="login">Log In</button>
+                    <button
+                        type="submit"
+                        id="login"
+                    >
+                        Log In
+                    </button>
 
                 </fieldset>
 
-                <!-- TODO: message container -->
                 <div id="message-container"></div>
 
             </form>
@@ -60,7 +77,6 @@
 
     </main>
 
-    <!-- TODO: Link login.js -->
     <script src="login.js" defer></script>
 
 </body>

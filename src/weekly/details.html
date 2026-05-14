@@ -1,10 +1,4 @@
-<!--
-  Requirement: Create the Dedicated Page for a Single Week
 
-  Instructions:
-  This page displays the full details for one week and allows students
-  to read and post discussion comments.
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,11 +7,15 @@
    <title>Week Details</title>
     <!-- Required: link details.js with defer. -->
     <script src="details.js" defer></script>
+    <link rel="stylesheet" href="../common/styles.css">
 </head>
 <body>
 
-   <header>
+  <header style="display:flex; justify-content:space-between; align-items:center;">
   <h1 id="week-title"></h1>
+  <nav>
+    <a href="list.html">← Back</a>
+  </nav>
 </header>
 
 <main>

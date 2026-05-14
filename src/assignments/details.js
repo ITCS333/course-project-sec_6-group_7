@@ -56,6 +56,7 @@ function renderAssignmentDetails(assignment) {
     const a  = document.createElement('a');
     a.href        = url;
     a.textContent = url;
+    a.target = '_blank';
     li.appendChild(a);
     assignmentFilesList.appendChild(li);
   });

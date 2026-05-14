@@ -1,158 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- TODO: Add the 'meta' tag for character encoding (UTF-8). -->
     <meta charset="UTF-8">
-
-    <!-- TODO: Add the responsive 'viewport' meta tag. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- TODO: Add a 'title' for the page, e.g., "Admin Portal". -->
     <title>Admin Portal</title>
 
-    <!-- TODO: Link to a CSS file or a CSS framework. -->
     <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@latest/css/pico.min.css">
 
-    <!-- TODO: Add a <script> tag that loads 'manage_users.js' with the 'defer' attribute.
-         Example: <script src="manage_users.js" defer></script> -->
     <script src="manage_users.js" defer></script>
 
 </head>
-<body>
+<body style="padding: 25px 50px;">
 
-    <!-- TODO: Create a 'header' element for the top of the page. -->
-    <header>
-        <!-- TODO: Inside the header, add a main heading (e.g., 'h1') with the text "Admin Portal". -->
+    <header style="display:flex; justify-content:space-between; align-items:center;">
         <h1>Admin Portal</h1>
-    </header>
-    <!-- End of the header. -->
+        <nav style="display:flex; gap:20px;">
 
-    <!-- TODO: Create a 'main' element to hold the primary content of the portal. -->
+  <a href="../admin/manage_users.html">Users</a>
+
+  <a href="../resources/admin.html">Resources</a>
+
+  <a href="../weekly/admin.html">Weekly</a>
+
+  <a href="../assignments/admin.html">Assignments</a>
+
+  <a href="../discussion/board.html">Discussion</a>
+
+  <a href="../../index.html">Logout</a>
+
+</nav>
+    </header>
+
     <main>
 
-        <!-- Section 1: Password Management -->
-        <!-- TODO: Create a 'section' for the password management functionality. -->
-        <section>
-            <!-- TODO: Add a sub-heading (e.g., 'h2') with the text "Change Your Password". -->
-            <h2>Change Your Password</h2>
+        <section style="max-width:700px; margin:70px auto 0 auto;">
 
-            <!-- TODO: Create a 'form' for changing the password.
-                 - action="#"
-                 - id="password-form" -->
-            <form action="#" id="password-form">
-                <!-- TODO: Use a 'fieldset' to group the password-related fields. -->
+            <h3>Change Your Password</h3>
+
+            <form action="#" id="password-form" style="padding:25px; border:1px solid #ddd; border-radius:10px; background:#fafafa;">
+
                 <fieldset>
-                    <!-- TODO: Add a 'legend' for the fieldset, e.g., "Password Update". -->
-                    <legend>Password Update</legend>
-
-                    <!-- TODO: Add a 'label' for the current password input. 'for' should be "current-password". -->
                     <label for="current-password">Current Password</label>
-                    <!-- TODO: Add an 'input' for the current password. -->
                     <input type="password" id="current-password" required>
 
-                    <!-- TODO: Add a 'label' for the new password input. -->
                     <label for="new-password">New Password</label>
-                    <!-- TODO: Add an 'input' for the new password. -->
                     <input type="password" id="new-password" minlength="8" required>
 
-                    <!-- TODO: Add a 'label' for the confirm password input. -->
                     <label for="confirm-password">Confirm Password</label>
-                    <!-- TODO: Add an 'input' to confirm the new password. -->
                     <input type="password" id="confirm-password" required>
 
-                    <!-- TODO: Add a 'button' to submit the form. -->
                     <button type="submit" id="change">Update Password</button>
 
                 </fieldset>
-                <!-- End of the fieldset. -->
+
             </form>
-            <!-- End of the password form. -->
+
         </section>
-        <!-- End of the password management section. -->
 
+        <section style="margin-top:60px; padding:30px; border:1px solid #ddd; border-radius:12px; background:#fafafa;">
 
-        <!-- Section 2: User Management -->
-        <!-- TODO: Create another 'section' for the user management functionality. -->
-        <section>
-            <!-- TODO: Add a sub-heading (e.g., 'h2') with the text "Manage Users". -->
-            <h2>Manage Users</h2>
+            <h2 style="margin-bottom:10px;">Manage Users</h2>
 
-            <!-- Subsection 2.1: Add New User Form -->
-            <!-- TODO: Create a 'details' element so the "Add User" form can be collapsed. -->
-            <details>
-                <!-- TODO: Add a 'summary' element -->
+            <details style="margin-bottom:25px;">
+
                 <summary>Add New User</summary>
 
-                <!-- TODO: Create a 'form' for adding a new user. -->
                 <form action="#" id="add-user-form">
-                    <!-- TODO: Use a 'fieldset' -->
+
                     <fieldset>
-                        <!-- TODO: Add a 'legend' -->
+
                         <legend>New User Information</legend>
 
-                        <!-- TODO: Add name -->
                         <label for="user-name">Full Name</label>
                         <input type="text" id="user-name" required>
 
-                        <!-- TODO: Add email -->
                         <label for="user-email">Email</label>
                         <input type="email" id="user-email" required>
 
-                        <!-- TODO: Add password -->
                         <label for="default-password">Password</label>
                         <input type="password" id="default-password" minlength="8" required>
 
-                        <!-- TODO: Admin select -->
                         <label for="is-admin">Role</label>
                         <select id="is-admin">
                             <option value="0">Student</option>
                             <option value="1">Admin</option>
                         </select>
 
-                        <!-- TODO: Submit button -->
-                        <button type="submit" id="add">Add User</button>
+                        <button style="padding:6px 12px;" type="submit" id="add">Add User</button>
 
                     </fieldset>
-                    <!-- End of the fieldset. -->
+
                 </form>
-                <!-- End of the add user form. -->
+
             </details>
-            <!-- End of the 'details' element. -->
 
-
-            <!-- Subsection 2.2: User List -->
-            <!-- TODO: Add a sub-heading -->
             <h3>Registered Users</h3>
 
-            <!-- TODO: Add a search input field. -->
             <input type="text" id="search-input" placeholder="Search by name or email...">
 
-            <!-- TODO: Create a 'table' -->
-            <table id="user-table">
-                <!-- TODO: Create a 'thead' -->
+            <table id="user-table" style="font-size:0.95rem;">
+
                 <thead>
-                    <!-- TODO: Create a 'tr' -->
+
                     <tr>
-                        <!-- TODO: Create 'th' -->
+
                         <th>Name</th>
                         <th>Email</th>
                         <th>Admin</th>
                         <th>Actions</th>
+
                     </tr>
                 </thead>
 
-                <!-- TODO: Create a 'tbody' -->
                 <tbody id="user-table-body">
                 </tbody>
 
             </table>
-            <!-- End of the table. -->
 
         </section>
-        <!-- End of the user management section. -->
 
     </main>
-    <!-- End of the main content area. -->
 
 </body>
 </html>

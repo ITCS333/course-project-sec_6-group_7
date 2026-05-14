@@ -16,8 +16,14 @@ function createResourceRow(resource) {
   const descriptionTd = document.createElement("td");
   descriptionTd.textContent = resource.description;
 
-  const linkTd = document.createElement("td");
-  linkTd.textContent = resource.link;
+const linkTd = document.createElement("td");
+
+const linkAnchor = document.createElement("a");
+linkAnchor.href = resource.link;
+linkAnchor.textContent = resource.link;
+linkAnchor.target = "_blank";
+
+linkTd.appendChild(linkAnchor);
 
   const actionsTd = document.createElement("td");
 

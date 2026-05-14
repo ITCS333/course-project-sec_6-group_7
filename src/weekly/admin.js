@@ -118,10 +118,13 @@ async function handleAddWeek(event) {
     return handleUpdateWeek(editId, { title, start_date, description, links });
   }
 
-  const res = await fetch("./api/index.php", {
-    method: "POST",
-    body: JSON.stringify({ title, start_date, description, links })
-  });
+const res = await fetch("./api/index.php", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ title, start_date, description, links })
+});
 
   const data = await res.json();
 
@@ -151,9 +154,12 @@ async function handleAddWeek(event) {
  */
 async function handleUpdateWeek(id, fields) {
 const res = await fetch("./api/index.php", {
-    method: "PUT",
-    body: JSON.stringify({ id, ...fields })
-  });
+  method: "PUT",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({ id, ...fields })
+});
 
   const data = await res.json();
 
