@@ -55,7 +55,7 @@ function handleChangePassword(e) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      id: localStorage.getItem("user_id"),
+      id: typeof localStorage !== "undefined" ? localStorage.getItem("user_id") : null,
       current_password: current,
       new_password: newPass
     })
