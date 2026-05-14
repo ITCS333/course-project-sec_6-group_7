@@ -14,7 +14,7 @@ The website covers five functional areas, each assigned to one team member.
 ## Live Demo
 
 > **Replit Deployment:** Update this link with your Replit deployment URL once the project is live.
-> https://course-project-sec-6-group-7--mayaali0029.replit.app
+> https://56759f98-d84a-4a6c-8744-ce1fa22881de-00-1d5q8l2he57yu.pike.replit.dev/
 
 ---
 
